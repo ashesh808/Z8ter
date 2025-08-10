@@ -57,32 +57,14 @@ Output:
 * **Stripe Integration**
 
   * `z8 stripe_integr` → pricing page, checkout routes, webhook handler.
-* **Database Layer**
+* **Frontend Integration**
 
-  * Simple API (`db.insert()`, `db.query()`, `db.delete()`).
-  * SQLite default, Postgres adapter option.
-* **LLM Integration**
+  * Adding Tailwind and Daisy UI.
+  * HTMX.
 
-  * Built-in helpers: `ask()`, `summarize()`, `extract()`.
-  * Easy model switching.
 * **`z8 dev` Command**
 
   * Run development server with auto-reload.
-
----
-
-## 📂 Project Structure
-
-```
-z8ter/              # Core framework code
-    __init__.py     # Jinja templates init
-    cli.py          # CLI entry point
-    page.py         # Base Page class
-views/              # Application page logic
-templates/          # Jinja templates
-components/         # Reusable UI components (e.g., base.jinja)
-setup.py            # Package metadata & CLI config
-```
 
 ---
 
@@ -103,7 +85,7 @@ z8 create_page about
 ### 3. Run the Dev Server
 
 ```bash
-uvicorn app:app --reload
+python3 main.py
 ```
 
 ---
@@ -114,4 +96,4 @@ Z8ter is designed to:
 
 * Reduce boilerplate for common patterns (auth, Stripe, routing).
 * Keep backend + frontend tightly coupled in development for speed.
-* Make creating interactive pages as fast as possible.
+* Make creating interactive pages as fast as possible with minimal JS.
