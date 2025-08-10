@@ -2,5 +2,7 @@
 .env
 venv
 .vscode
-__pycache__
+__pycache__/
+*.py[cod]
 .DS_Store
+z8ter.egg-info
