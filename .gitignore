@@ -6,3 +6,4 @@ __pycache__/
 *.py[cod]
 .DS_Store
 z8ter.egg-info
+node_modules

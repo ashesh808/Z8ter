@@ -1,0 +1,18 @@
+{
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.12",
+    "concurrently": "^8.2.2",
+    "daisyui": "^5.0.50",
+    "tailwindcss": "^4.1.12",
+    "typescript": "^5.5.0"
+  },
+  "scripts": {
+    "dev:css": "npx @tailwindcss/cli -i src/css/app.css -o static/css/output.css -w",
+    "dev:ts": "tsc -w --preserveWatchOutput",
+    "dev:server": "python3 main.py",
+    "dev": "concurrently -n css,ts,server -c green,blue,magenta \"npm:dev:css\" \"npm:dev:ts\" \"npm:dev:server\"",
+    "build:css": "tailwindcss -i static/css/app.css -o static/css/output.css",
+    "build:ts": "tsc -p tsconfig.json",
+    "build": "npm run build:css && npm run build:ts"
+  }
+}

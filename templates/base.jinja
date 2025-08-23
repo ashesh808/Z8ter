@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="corporate">
+<html lang="en" data-theme="luxury">
   <head>
     <meta charset="UTF-8" />
     <title>Z8ter</title>
@@ -14,23 +14,25 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
       rel="stylesheet"
     />
+    <link
+      href="{{ url_for('static', filename='css/output.css') }}"
+      rel="stylesheet"
+    />
     <style>
       body {
         font-family: "Inter", sans-serif;
       }
     </style>
   </head>
-  <body class="bg-base-100 text-base-content">
+  <body class="bg-base-100 text-base-content" data-page="{{ page_id|default('default') }}">
     {% include "components/header.jinja" %}
-    <main class="flex-1 max-w-4xl mx-auto px-6 py-16 w-full">
+    <main class="flex-1 max-w-4xl mx-auto px-6 pt-24 pb-24 w-full">
       {% block content %}{% endblock %}
     </main>
     {% include "components/footer.jinja" %}
 
     <!-- Global JS -->
-    <script></script>
-
-    <!-- Page-specific JS -->
-    {% block scripts %}{% endblock %}
+    <script type="module"  src="{{ url_for('static', filename='js/app.js') }}"></script>
+    
   </body>
 </html>

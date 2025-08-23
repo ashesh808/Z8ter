@@ -1,6 +1,14 @@
 from z8ter import TEMPLATES_DIR, VIEWS_DIR
 import sys
 
+'''
+CLI support for the following commands -
+    1. z8ter create_page newpage
+    2. z8ter new project
+    3. z8ter run
+    4. z8ter run dev
+'''
+
 
 def create_page(page_name: str):
     # Normalize names
