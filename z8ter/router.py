@@ -77,3 +77,19 @@ def build_routes_from_apis(api_dir: str = "api") -> list[Mount]:
         for cls in classes:
             routes.append(cls.build_mount())
     return routes
+
+
+def build_favicon_route(api_dir: str = "static/favicon") -> list[Mount]:
+    routes: list[Mount] = []
+    pages_root = Path(api_dir).resolve()
+    for file_path in pages_root.rglob("*.py"):
+        if file_path.name == "__init__.py":
+            continue
+        rel_to_cwd = file_path.relative_to(Path().resolve())
+        mod = _import_module_for(rel_to_cwd, api_dir)
+        classes = list(_iter_api_classes(mod))
+        if not classes:
+            continue
+        for cls in classes:
+            routes.append(cls.build_mount())
+    return routes
