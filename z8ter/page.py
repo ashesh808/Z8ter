@@ -1,8 +1,8 @@
 from __future__ import annotations
-from starlette.requests import Request
-from starlette.responses import Response
 from starlette.endpoints import HTTPEndpoint
-from z8ter import templates
+from z8ter.requests import Request
+from z8ter.responses import Response
+from z8ter import get_templates
 
 
 class Page(HTTPEndpoint):
@@ -26,4 +26,5 @@ class Page(HTTPEndpoint):
         ctx = {"page_id": page_id, "request": request}
         if context:
             ctx.update(context)
+        templates = get_templates()
         return templates.TemplateResponse(template_name, ctx)

@@ -1,6 +1,6 @@
 from z8ter.api import API
-from starlette.responses import JSONResponse
-from starlette.requests import Request
+from z8ter.responses import JSONResponse
+from z8ter.requests import Request
 
 
 class Hello(API):

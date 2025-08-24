@@ -1,3 +1,51 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=68", "wheel", "build"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "z8ter"
+version = "0.1.1"
+description = "Minimal Starlette-powered app framework with pages, APIs, and a DX-first CLI."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Ashesh Nepal", email = "you@example.com" }]
+keywords = ["starlette", "asgi", "framework", "uvicorn"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Framework :: AsyncIO",
+  "Framework :: Starlette",
+  "License :: OSI Approved :: MIT License",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+]
+
+# Core runtime deps
+dependencies = [
+  "starlette>=0.36,<1.0",
+  "jinja2>=3.1,<4",
+  "itsdangerous>=2.1,<3",
+  "uvicorn>=0.30,<1.0",
+  "rich>=13.7,<14"
+]
+
+[project.optional-dependencies]
+# If you want to slim core, you can move uvicorn/rich here and tell users to `pip install z8ter[server]`
+server = ["uvicorn[standard]>=0.30,<1.0", "rich>=13.7,<14"]
+dev = ["pytest", "pytest-asyncio", "ruff", "mypy", "build", "twine"]
+
+[project.scripts]
+z8 = "z8ter.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/ashesh808/Z8ter"
+Issues = "https://github.com/ashesh808/Z8ter/issues"
+
+[tool.setuptools]
+packages = { find = { where = ["."], include = ["z8ter*"] } }
+include-package-data = false
