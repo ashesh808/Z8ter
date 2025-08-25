@@ -1,7 +1,7 @@
 """
 z8ter.responses
 
-Re-exports Starlette’s response classes. Identical today, but may
+Re-exports Starlette's response classes. Identical today, but may
 gain enhancements in future Z8ter releases.
 """
 

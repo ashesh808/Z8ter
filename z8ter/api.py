@@ -1,41 +1,47 @@
 from __future__ import annotations
+from typing import Any, Callable, ClassVar, List, Tuple, Type
 from starlette.routing import Route, Mount
 
 
-class API():
+class API:
     """
     Class which supports endpoint decorators to provide a list of endpoints
     for a particular app
     """
-    def __init_subclass__(cls, **kwargs):
+
+    _api_id: ClassVar[str]
+    _endpoints: ClassVar[List[Tuple[str, str, str]]]
+
+    def __init_subclass__(cls: Type[API], **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
-        mod = cls.__module__
+        mod: str = cls.__module__
         if mod.startswith("api."):
             id = mod.removeprefix("api.")
         else:
             id = mod
-        cls._api_id = id.replace('.', '/')
-        cls._endpoints = []
+        cls._api_id = id.replace(".", "/")
         cls._endpoints = []
         for name, obj in cls.__dict__.items():
-            meta = getattr(obj, "_z8_endpoint", None)
+            meta: Tuple[str, str] | None = getattr(obj, "_z8_endpoint", None)
             if meta:
                 http_method, subpath = meta
                 cls._endpoints.append((http_method, subpath, name))
 
     @classmethod
-    def build_mount(cls) -> Mount:
-        prefix = f"/api/{getattr(cls, "_api_id")}"
-        inst = cls()
-        routes = [
+    def build_mount(cls: Type[API]) -> Mount:
+        prefix: str = f"/api/{getattr(cls, '_api_id')}"
+        inst: API = cls()
+        routes: List[Route] = [
             Route(subpath, endpoint=getattr(inst, func_name), methods=[method])
             for (method, subpath, func_name) in getattr(cls, "_endpoints", [])
         ]
         return Mount(prefix, routes=routes)
 
     @staticmethod
-    def endpoint(method: str, path: str):
-        def deco(fn):
+    def endpoint(
+            method: str, path: str
+    ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+        def deco(fn: Callable[..., Any]) -> Callable[..., Any]:
             setattr(fn, "_z8_endpoint", (method.upper(), path))
             return fn
         return deco
