@@ -1,14 +1,20 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "ES2020",
-    "moduleResolution": "Node",
-    "outDir": "static/js",
-    "rootDir": "src/ts",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/ts/*"]
+    },
+    "types": ["vite/client"],
+    "jsxImportSource": "solid-js",
     "strict": true,
     "isolatedModules": true,
-    "skipLibCheck": true
+    "noEmit": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/ts"]
+  "include": ["src/ts", "env.d.ts"],
+  "exclude": ["node_modules", "static/js/dist"]
 }
-

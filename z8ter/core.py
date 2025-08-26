@@ -8,10 +8,11 @@ from starlette.datastructures import URLPath
 from starlette.types import Receive, Scope, Send
 from starlette.templating import Jinja2Templates
 from z8ter import get_templates
+from z8ter.vite import vite_script_tag
 from z8ter.route_builders import (
     build_routes_from_pages,
     build_routes_from_apis,
-    build_file_routes,
+    build_file_routes
 )
 logger = logging.getLogger("z8ter")
 
@@ -54,6 +55,7 @@ class Z8ter:
 
         templates: Jinja2Templates = get_templates()
         templates.env.globals["url_for"] = _url_for
+        templates.env.globals["vite_script_tag"] = vite_script_tag
 
         if self.debug:
             logger.warning("🧪 Z8ter running in DEBUG mode")

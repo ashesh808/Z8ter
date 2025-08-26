@@ -1,38 +1,28 @@
 type PageCtx = { pageId: string; id: string; body: HTMLElement };
 type PageModule = { default?: (ctx: PageCtx) => void | Promise<void> };
-const pagesPath: string = "/static/js/pages/"
 
-function onReady(fn: () => void): void {
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", fn, { once: true });
-  } else {
-    fn();
-  }
-}
+const pages = import.meta.glob<PageModule>("./pages/**/*.ts", { eager: false });
 
 function pageIdFromDOM(): string {
-  const id = document.body?.dataset?.page?.trim();
-  return id && id.length > 0 ? id : "default";
+  return document.body?.dataset?.page?.trim() || "default";
+}
+function idToKey(id: string): string {
+  return `./pages/${id.split(".").join("/")}.ts`;
 }
 
-function idToPath(id: string): string {
-  const segs = id.split(".").join("/");
-  return `${pagesPath}${segs}.js`;
-}
-
-async function loadAndRun(id: string): Promise<void> {
-  const path = idToPath(id);
-  try {
-    const mod = (await import(/* @vite-ignore */ path)) as PageModule;
-    await mod.default?.({ pageId: id, id, body: document.body });
-    console.debug("[router] loaded:", id, "→", path);
-  } catch {
-    console.warn("[router] missing module:", id, "→", path);
+async function run(id: string) {
+  const key = idToKey(id);
+  console.debug("[z8] pageId:", id, "key:", key, "seen keys:", Object.keys(pages));
+  const importer = pages[key];
+  if (!importer) {
+    console.warn("[z8] missing page module:", key);
+    return;
   }
+  const mod = await importer();
+  await mod.default?.({ pageId: id, id, body: document.body });
 }
 
-onReady(async () => {
-  const pid = pageIdFromDOM();
-  await loadAndRun("common");
-  await loadAndRun(pid);
+document.addEventListener("DOMContentLoaded", async () => {
+  await run("common");
+  await run(pageIdFromDOM());
 });

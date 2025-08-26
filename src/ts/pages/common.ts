@@ -1,3 +1,3 @@
 export default function initCommon(): void {
-    //Add any common functionality scripts here
+    console.log("Hello from common!")
 }

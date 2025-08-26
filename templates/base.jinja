@@ -32,7 +32,7 @@
     {% include "components/footer.jinja" %}
 
     <!-- Global JS -->
-    <script type="module"  src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {{ vite_script_tag("src/ts/app.ts") }}
     
   </body>
 </html>

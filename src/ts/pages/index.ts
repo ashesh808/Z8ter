@@ -14,8 +14,6 @@ export default function initIndex(): void {
         return;
       }
       const data = await res.json();
-
-      // pretty-print safely
       const pre = document.createElement("pre");
       pre.className = "bg-base-300 p-3 rounded overflow-x-auto text-sm";
       pre.textContent = typeof data === "string" ? data : JSON.stringify(data, null, 2);
