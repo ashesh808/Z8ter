@@ -1,7 +1,10 @@
 from __future__ import annotations
-from pathlib import Path
 import importlib
-from typing import Iterable, Type
+import importlib.util
+import inspect
+import os
+from pathlib import Path
+from typing import Iterable, Type, Tuple, List, Optional
 from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 from starlette.endpoints import HTTPEndpoint
@@ -9,81 +12,142 @@ from z8ter import STATIC_PATH
 from z8ter.api import API
 
 
-def _import_module_for(rel_path: Path, package_root: str) -> object:
-    mod_name = str(rel_path.with_suffix("")).replace(
-        "/", ".").replace("\\", ".")
-    if mod_name.startswith(f"{package_root}."):
-        full_name = mod_name
+# ---------- helpers ----------
+
+def _resolve_roots(pkg_or_path: str) -> Tuple[Optional[str], List[str]]:
+    """
+    If pkg_or_path is a Python package (e.g., 'endpoints.views')
+        return (pkg_name, [roots]).
+    If it's a filesystem path ('endpoints/views')
+        return (None, [abs_path]).
+    Raise if neither can be located.
+    """
+    if os.path.sep in pkg_or_path or pkg_or_path.endswith(".py"):
+        p = Path(pkg_or_path)
+        if p.exists():
+            return None, [str(p.resolve())]
+    spec = importlib.util.find_spec(pkg_or_path)
+    if spec and spec.submodule_search_locations:
+        return pkg_or_path, list(spec.submodule_search_locations)
+    p = Path(pkg_or_path)
+    if p.exists():
+        return None, [str(p.resolve())]
+    raise ModuleNotFoundError(
+        f"Cannot locate package or folder: {pkg_or_path!r}"
+    )
+
+
+def _module_name_from_file(pkg_name: str, root: str, file_path: Path) -> str:
+    """Compute 'endpoints.views.foo.bar' from root and file path."""
+    rel = file_path.relative_to(root)
+    dotted = ".".join(rel.with_suffix("").parts)
+    return f"{pkg_name}.{dotted}"
+
+
+def _module_name_from_fs(file_path: Path) -> str:
+    """
+    Best-effort module name from filesystem relative to CWD.
+    Requires CWD (project root) to be on sys.path.
+    """
+    rel = file_path.relative_to(Path().resolve())
+    return ".".join(rel.with_suffix("").parts)
+
+
+def _import_module_for(
+        file_path: Path, pkg_name: Optional[str], root: str
+) -> object:
+    if pkg_name:
+        mod_name = _module_name_from_file(pkg_name, root, file_path)
     else:
-        full_name = f"{package_root}.{mod_name}"
-    return importlib.import_module(full_name)
+        mod_name = _module_name_from_fs(file_path)
+    return importlib.import_module(mod_name)
 
 
 def _iter_page_classes(mod) -> Iterable[Type[HTTPEndpoint]]:
     from .page import Page
-    for obj in vars(mod).values():
-        if isinstance(obj, type) and issubclass(obj, Page) and obj is not Page:
+    for _, obj in inspect.getmembers(mod, inspect.isclass):
+        if issubclass(obj, Page) and obj is not Page:
             yield obj
 
 
 def _iter_api_classes(mod) -> Iterable[Type[API]]:
-    from .api import API
-    for obj in vars(mod).values():
-        if isinstance(obj, type) and issubclass(obj, API) and obj is not API:
+    for _, obj in inspect.getmembers(mod, inspect.isclass):
+        if issubclass(obj, API) and obj is not API:
             yield obj
 
 
-def _url_from_file(pages_root: Path, file_path: Path) -> str:
-    rel = file_path.relative_to(pages_root).with_suffix("")
-    parts = rel.parts
+def _url_from_file(root: Path, file_path: Path) -> str:
+    """
+    Map file location to URL:
+      root/resumes/index.py -> /resumes
+      root/resumes/edit.py  -> /resumes/edit
+    """
+    rel = file_path.relative_to(root).with_suffix("")
+    parts = list(rel.parts)
+    if parts and parts[-1].lower() == "index":
+        parts = parts[:-1]
     url = "/" + "/".join(parts)
-    if url.endswith("/index"):
-        url = url[:-len("/index")] or "/"
     return url or "/"
 
 
-def build_routes_from_pages(pages_dir: str = "views") -> list[Route]:
-    routes: list[Route] = []
-    pages_root = Path(pages_dir).resolve()
+# ---------- builders ----------
+
+def build_routes_from_pages(pages_dir: str = "endpoints.views") -> List[Route]:
+    """
+    Scan a package (e.g., 'endpoints.views') or folder ('endpoints/views')
+    for Page (HTTPEndpoint) subclasses and create Route entries.
+    """
+    pkg_name, roots = _resolve_roots(pages_dir)
+    routes: List[Route] = []
     seen_paths: set[str] = set()
-    for file_path in pages_root.rglob("*.py"):
-        if file_path.name == "__init__.py":
-            continue
-        rel_to_cwd = file_path.relative_to(Path().resolve())
-        mod = _import_module_for(rel_to_cwd, pages_dir)
-        classes = list(_iter_page_classes(mod))
-        if not classes:
-            continue
-        base_path = _url_from_file(pages_root, file_path)
-        for cls in classes:
-            path = getattr(cls, "path", None) or base_path
-            if path in seen_paths and getattr(cls, "path", None) is None:
-                path = f"{base_path}/{cls.__name__.lower()}"
-            if path not in seen_paths:
-                routes.append(Route(path, cls))
-                seen_paths.add(path)
+
+    for root in roots:
+        root_path = Path(root)
+        for file_path in root_path.rglob("*.py"):
+            if file_path.name == "__init__.py":
+                continue
+            mod = _import_module_for(file_path, pkg_name, root)
+            classes = list(_iter_page_classes(mod))
+            if not classes:
+                continue
+            base_path = _url_from_file(root_path, file_path)
+            for cls in classes:
+                path = getattr(cls, "path", None) or base_path
+                if path in seen_paths and getattr(cls, "path", None) is None:
+                    path = f"{base_path}/{cls.__name__.lower()}"
+                if path not in seen_paths:
+                    routes.append(Route(path, endpoint=cls))
+                    seen_paths.add(path)
     return routes
 
 
-def build_routes_from_apis(api_dir: str = "api") -> list[Mount]:
-    routes: list[Mount] = []
-    pages_root = Path(api_dir).resolve()
-    for file_path in pages_root.rglob("*.py"):
-        if file_path.name == "__init__.py":
-            continue
-        rel_to_cwd = file_path.relative_to(Path().resolve())
-        mod = _import_module_for(rel_to_cwd, api_dir)
-        classes = list(_iter_api_classes(mod))
-        if not classes:
-            continue
-        for cls in classes:
-            routes.append(cls.build_mount())
-    return routes
+def build_routes_from_apis(api_dir: str = "endpoints.api") -> List[Mount]:
+    """
+    Scan a package (e.g., 'endpoints.apis') or folder ('endpoints/apis')
+    for API subclasses and mount them.
+    """
+    pkg_name, roots = _resolve_roots(api_dir)
+    mounts: List[Mount] = []
+    for root in roots:
+        root_path = Path(root)
+        for file_path in root_path.rglob("*.py"):
+            if file_path.name == "__init__.py":
+                continue
+            mod = _import_module_for(file_path, pkg_name, root)
+            classes = list(_iter_api_classes(mod))
+            if not classes:
+                continue
+            for cls in classes:
+                mounts.append(cls.build_mount())
+    return mounts
 
 
-def build_file_routes() -> Mount:
-    if STATIC_PATH.exists():
-        mt = Mount(
+def build_file_route() -> Optional[Mount]:
+    """
+    Mount /static if STATIC_PATH exists. Return None otherwise.
+    """
+    if STATIC_PATH and Path(STATIC_PATH).exists():
+        return Mount(
             "/static", StaticFiles(directory=str(STATIC_PATH)), name="static"
         )
-    return mt
+    return None

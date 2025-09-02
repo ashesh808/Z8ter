@@ -16,8 +16,8 @@ class Page(HTTPEndpoint):
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         mod: str = cls.__module__
-        if mod.startswith("views."):
-            pid = mod.removeprefix("views.")
+        if mod.startswith("endpoints.views."):
+            pid = mod.removeprefix("endpoints.views.")
         else:
             pid = mod
         cls._page_id = pid

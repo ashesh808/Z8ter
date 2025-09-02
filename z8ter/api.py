@@ -29,7 +29,7 @@ class API:
 
     @classmethod
     def build_mount(cls: Type[API]) -> Mount:
-        prefix: str = f"/api/{getattr(cls, '_api_id')}"
+        prefix: str = f"{getattr(cls, '_api_id')}".removeprefix('endpoints')
         inst: API = cls()
         routes: List[Route] = [
             Route(subpath, endpoint=getattr(inst, func_name), methods=[method])

@@ -1,16 +1,21 @@
 {% extends "base.jinja" %}
 {% block content %}
-
+{% 
+  from "macros/islands.jinja" import 
+   Z8_Theme_Toggle, Z8_Copy_Button, Z8_Online_Badge, Z8_Clock, Z8_Ping, Z8_Island_Pref 
+%}
 <section class="hero bg-base-200 rounded-2xl p-8 md:p-12">
   <div class="hero-content flex-col gap-4 text-center">
     <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">About Z8ter</h1>
     <p class="opacity-90 text-lg">Async Python, SSR-first — small, fast, convention-driven.</p>
+
     <div class="mt-4 flex flex-wrap items-center justify-center gap-3">
-      <z8-theme-toggle></z8-theme-toggle>
-      <z8-copy-button text="pip install -e ." label="Copy install" copiedLabel="Copied!"></z8-copy-button>
-      <z8-online-badge></z8-online-badge>
-      <z8-clock></z8-clock>
+      {{ Z8_Theme_Toggle() }}
+      {{ Z8_Copy_Button("pip install z8ter", "Copy install",  "Copied!" ) }}
+      {{ Z8_Online_Badge() }}
+      {{ Z8_Clock() }}
     </div>
+
   </div>
 </section>
 
@@ -33,7 +38,7 @@
         <li class="flex items-start gap-3"><span>⚡</span><span>Async-first, SSR-first</span></li>
         <li class="flex items-start gap-3"><span>🧩</span><span>Small surface area, sharp tools</span></li>
       </ul>
-      <z8-island-pref></z8-island-pref>
+      {{ Z8_Island_Pref() }}
     </div>
   </div>
 </section>
@@ -43,9 +48,8 @@
     <div class="card-body">
       <h2 class="card-title">Client demos</h2>
       <p class="opacity-80">Benchmark an API call locally and pretty-print the JSON.</p>
-      <z8-ping endpoint="/api/hello"></z8-ping>
+      {{ Z8_Ping("/api/hello") }}
     </div>
   </div>
 </section>
-
 {% endblock %}

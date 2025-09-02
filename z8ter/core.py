@@ -12,7 +12,7 @@ from z8ter.vite import vite_script_tag
 from z8ter.route_builders import (
     build_routes_from_pages,
     build_routes_from_apis,
-    build_file_routes
+    build_file_route
 )
 logger = logging.getLogger("z8ter")
 
@@ -68,7 +68,9 @@ class Z8ter:
     def _assemble_routes(self) -> List[Route | Mount]:
         routes: List[Route | Mount] = []
         routes += self._extra_routes
-        routes.append(build_file_routes())
+        file_mt = build_file_route()
+        if file_mt:
+            routes.append(file_mt)
         routes += build_routes_from_pages()
         routes += build_routes_from_apis()
         return routes

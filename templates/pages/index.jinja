@@ -1,5 +1,6 @@
 {% extends "base.jinja" %}
 {% block content %}
+{% from "macros/tailwind.jinja" import h1%}
   <!-- Hero -->
   <section class="hero bg-base-200 rounded-2xl p-8 md:p-12">
     <div class="hero-content flex-col md:flex-row gap-10">
@@ -9,7 +10,7 @@
         </div>
       </div>
       <div>
-        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">Z8ter</h1>
+        {{h1 ("Z8ter")}}
         <p class="py-4 text-lg opacity-90">
           Async Python, SSR-first. File-based <span class="font-semibold">views</span> & tidy
           <span class="font-semibold">APIs</span>, with a sprinkle of joy.
