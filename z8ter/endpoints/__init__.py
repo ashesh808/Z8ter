@@ -54,10 +54,10 @@ def _resolve_paths(base: Path) -> Paths:
     base = base.resolve()
     return Paths(
         base=base,
-        views=base / "endpoints" / "views",
+        views=base / "views",
         templates=base / "templates",
         static=base / "static",
-        api=base / "endpoints" / "api",
+        api=base / "api",
         ts=base / "src" / "ts",
     )
 

@@ -1,28 +1,30 @@
 import z8ter
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, ChoiceLoader, FileSystemLoader, PackageLoader
+
 
 env = Environment(
-    loader=FileSystemLoader("z8ter_scaffold"),
+    loader=ChoiceLoader([
+        FileSystemLoader("scaffold_dev"),
+        PackageLoader("z8ter", "scaffold"),
+    ]),
     autoescape=False,
-    variable_start_string="[[",
-    variable_end_string="]]",
-    block_start_string="[%",
-    block_end_string="%]",
+    variable_start_string="[[", variable_end_string="]]",
+    block_start_string="[%", block_end_string="%]",
 )
 
 
 def create_page(page_name: str):
     class_name = page_name.capitalize()
     page_name_lower = page_name.lower()
-    template_path = z8ter.TEMPLATES_DIR / f"{page_name_lower}.jinja"
+    template_path = z8ter.TEMPLATES_DIR / "pages" / f"{page_name_lower}.jinja"
     view_path = z8ter.VIEWS_DIR / f"{page_name_lower}.py"
     ts_path = z8ter.TS_DIR / "pages" / f"{page_name_lower}.ts"
-    content_path = z8ter.BASE_DIR / "content" / f"{page_name_lower}.ts"
+    content_path = z8ter.BASE_DIR / "content" / f"{page_name_lower}.yaml"
     data = {"class_name": class_name, "page_name_lower": page_name_lower}
     files = [
         ("create_page_templates/view.py.j2", view_path),
         ("create_page_templates/page.jinja.j2", template_path),
-        ("create_page_templates/content.yaml.j2", content_path),
+        ("create_page_templates/page.yaml.j2", content_path),
         ("create_page_templates/page.ts.j2", ts_path)
     ]
     for tpl_name, out_path in files:

@@ -9,7 +9,7 @@ description = "Minimal Starlette-powered app framework with pages, APIs, and a D
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
-authors = [{ name = "Ashesh Nepal", email = "you@example.com" }]
+authors = [{ name = "Ashesh Nepal", email = "nepalashesh8@gmail.com" }]
 keywords = ["starlette", "asgi", "framework", "uvicorn"]
 classifiers = [
   "Programming Language :: Python :: 3",
@@ -53,4 +53,10 @@ where = ["."]
 include = ["z8ter*"]
 
 [tool.setuptools.package-data]
-z8ter = ["py.typed"]
+z8ter = [
+  "py.typed",
+  "scaffold/**/*.j2",
+  "scaffold/**/*.jinja",
+  "scaffold/**/*.yaml",
+  "scaffold/**/*.yml",
+]
