@@ -39,7 +39,7 @@ server = ["uvicorn[standard]>=0.30,<1.0", "rich>=13.7,<14"]
 dev = ["pytest", "pytest-asyncio", "ruff", "mypy", "build", "twine"]
 
 [project.scripts]
-z8 = "z8ter.cli:main"
+z8 = "z8ter.cli.main:main"
 
 [project.urls]
 Homepage = "https://github.com/ashesh808/Z8ter"

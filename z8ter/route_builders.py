@@ -9,7 +9,8 @@ from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 from starlette.endpoints import HTTPEndpoint
 from z8ter import STATIC_PATH
-from z8ter.api import API
+from z8ter.endpoints.api import API
+from z8ter.endpoints.view import View
 
 
 # ---------- helpers ----------
@@ -64,9 +65,8 @@ def _import_module_for(
 
 
 def _iter_page_classes(mod) -> Iterable[Type[HTTPEndpoint]]:
-    from .page import Page
     for _, obj in inspect.getmembers(mod, inspect.isclass):
-        if issubclass(obj, Page) and obj is not Page:
+        if issubclass(obj, View) and obj is not View:
             yield obj
 
 

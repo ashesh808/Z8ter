@@ -1,54 +1,64 @@
 {% extends "base.jinja" %}
 {% block content %}
-{% 
-  from "macros/islands.jinja" import 
-   Z8_Theme_Toggle, Z8_Copy_Button, Z8_Online_Badge, Z8_Clock, Z8_Ping, Z8_Island_Pref 
-%}
+{% from "macros/islands.jinja" import Z8_Theme_Toggle, Z8_Copy_Button, Z8_Online_Badge, Z8_Clock, Z8_Ping, Z8_Island_Pref %}
+
+<!-- Hero -->
 <section class="hero bg-base-200 rounded-2xl p-8 md:p-12">
   <div class="hero-content flex-col gap-4 text-center">
-    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">About Z8ter</h1>
-    <p class="opacity-90 text-lg">Async Python, SSR-first — small, fast, convention-driven.</p>
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">{{ page_content.hero.title }}</h1>
+    <p class="opacity-90 text-lg">{{ page_content.hero.subtitle }}</p>
 
+    {% if page_content.hero.actions %}
     <div class="mt-4 flex flex-wrap items-center justify-center gap-3">
-      {{ Z8_Theme_Toggle() }}
-      {{ Z8_Copy_Button("pip install z8ter", "Copy install",  "Copied!" ) }}
-      {{ Z8_Online_Badge() }}
-      {{ Z8_Clock() }}
+      {% for a in page_content.hero.actions %}
+        {% if a.type == "theme_toggle" %}
+          {{ Z8_Theme_Toggle() }}
+        {% elif a.type == "copy_button" %}
+          {{ Z8_Copy_Button(a.text, a.label, a.success) }}
+        {% elif a.type == "online_badge" %}
+          {{ Z8_Online_Badge() }}
+        {% elif a.type == "clock" %}
+          {{ Z8_Clock() }}
+        {% endif %}
+      {% endfor %}
     </div>
-
+    {% endif %}
   </div>
 </section>
 
+<!-- Two cards: What is + Principles -->
 <section class="mt-10 grid md:grid-cols-2 gap-8">
   <div class="card bg-base-200">
     <div class="card-body">
-      <h2 class="card-title">What is Z8ter?</h2>
-      <p class="opacity-80">
-        A minimal full-stack framework on Starlette + Jinja2. File-based views, decorator APIs,
-        and tiny per-page JS islands.
-      </p>
+      <h2 class="card-title">{{ page_content.sections.what_is.title }}</h2>
+      <p class="opacity-80">{{ page_content.sections.what_is.text }}</p>
     </div>
   </div>
 
   <div class="card bg-base-200">
     <div class="card-body">
-      <h2 class="card-title">Principles</h2>
-      <ul class="space-y-2 text-sm">
-        <li class="flex items-start gap-3"><span>📂</span><span>Conventions over config</span></li>
-        <li class="flex items-start gap-3"><span>⚡</span><span>Async-first, SSR-first</span></li>
-        <li class="flex items-start gap-3"><span>🧩</span><span>Small surface area, sharp tools</span></li>
-      </ul>
-      {{ Z8_Island_Pref() }}
+      <h2 class="card-title">{{ page_content.sections.principles.title }}</h2>
+        <ul class="space-y-2 text-sm">
+          {% for it in page_content.sections.principles['items'] | default([]) %}
+            <li class="flex items-start gap-3">
+              <span>{{ it.icon }}</span><span>{{ it.text }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% if page_content.sections.principles.footer_island == "island_pref" %}
+        {{ Z8_Island_Pref() }}
+      {% endif %}
     </div>
   </div>
 </section>
 
+<!-- Client demos -->
 <section class="mt-10">
   <div class="card bg-base-200">
     <div class="card-body">
-      <h2 class="card-title">Client demos</h2>
-      <p class="opacity-80">Benchmark an API call locally and pretty-print the JSON.</p>
-      {{ Z8_Ping("/api/hello") }}
+      <h2 class="card-title">{{ page_content.sections.client_demos.title }}</h2>
+      <p class="opacity-80">{{ page_content.sections.client_demos.text }}</p>
+      {{ Z8_Ping(page_content.sections.client_demos.ping_endpoint) }}
     </div>
   </div>
 </section>

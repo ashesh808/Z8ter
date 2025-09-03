@@ -1,4 +1,4 @@
-from z8ter.api import API
+from z8ter.endpoints.api import API
 from z8ter.responses import JSONResponse
 from z8ter.requests import Request
 

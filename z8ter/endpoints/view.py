@@ -1,14 +1,13 @@
 from __future__ import annotations
 from typing import Any, ClassVar, Optional
 from starlette.endpoints import HTTPEndpoint
-from starlette.templating import Jinja2Templates
 from starlette.types import Receive, Scope, Send
 from z8ter.requests import Request
-from starlette.responses import Response as StarletteResponse
-from z8ter import get_templates
+from z8ter.responses import Response
+from z8ter.endpoints.helpers import render, load_content
 
 
-class Page(HTTPEndpoint):
+class View(HTTPEndpoint):
     """HTTPEndpoint + a small render() helper for templates."""
 
     _page_id: ClassVar[str]
@@ -36,10 +35,10 @@ class Page(HTTPEndpoint):
         request: Request,
         template_name: str,
         context: dict[str, Any] | None = None,
-    ) -> StarletteResponse:
+    ) -> Response:
         page_id: str = getattr(self.__class__, "_page_id", "")
         ctx: dict[str, Any] = {"page_id": page_id, "request": request}
         if context:
             ctx.update(context)
-        templates: Jinja2Templates = get_templates()
-        return templates.TemplateResponse(template_name, ctx)
+        ctx.update(load_content(page_id))
+        return render(template_name, ctx)
