@@ -11,3 +11,10 @@ class Hello(API):
     async def send_hello(self, request: Request) -> JSONResponse:
         content = {"message": "Hello from the API!"}
         return JSONResponse(content, 200)
+
+    @API.endpoint("GET", "/error")
+    async def send_error(self, request: Request) -> JSONResponse:
+        content = None
+        if content is None:
+            raise TypeError("Content cannot be Null!")
+        return JSONResponse(content, 200)
