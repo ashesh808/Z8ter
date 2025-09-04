@@ -1,5 +1,37 @@
 {% extends "base.jinja" %}
 {% block content %}
   <h1>Login</h1>
-  <h2>{{ page_content.headings.subheading }}</h2>
+  {% if page_content and page_content.headings and page_content.headings.subheading %}
+    <h2>{{ page_content.headings.subheading }}</h2>
+  {% endif %}
+
+  {# Optional generic error to avoid enumeration #}
+  {% if error %}
+    <p class="text-red-600">{{ error }}</p>
+  {% endif %}
+
+  <form action="/login" method="post" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+
+    <div>
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="email" required>
+    </div>
+
+    <div>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+    </div>
+
+    <div>
+      <label>
+        <input type="checkbox" name="remember" value="1">
+        Remember me
+      </label>
+    </div>
+
+    <button type="submit">Sign in</button>
+  </form>
+
+  <p><a href="/reset">Forgot your password?</a></p>
 {% endblock %}
