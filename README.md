@@ -1,5 +1,5 @@
-# ![alt text](image.png)
-**Z8ter** is a lightweight, Laravel-inspired full-stack Python web framework built on [Starlette], designed for rapid development with tight integration between backend logic and frontend templates—plus small client-side “islands” where they make sense.
+# Z8ter
+![alt text](image-3.png)**8ter** is a lightweight, Laravel-inspired full-stack Python web framework built on [Starlette], designed for rapid development with tight integration between backend logic and frontend templates plus small client-side “islands” where they make sense.
 
 ```mermaid
 flowchart LR
@@ -172,7 +172,7 @@ class Hello(API):
         return {"ok": True, "message": "Hello from Z8ter"}
 ```
 
-### Main Application (bootstrapping Z8ter)
+### Main Application (bootstrapping ![alt text](image-3.png)8ter)
 
 Your app entrypoint defines the pipeline of features by chaining builder steps.
 This example shows a minimal project with templating, Vite, and authentication wired in.
@@ -200,8 +200,8 @@ if __name__ == "__main__":
 
 ### Authentication (Sessions + Users)
 
-Z8ter ships with a minimal but flexible authentication layer.
-You provide two repos — `SessionRepo` and `UserRepo` — and Z8ter wires them into middleware that sets `request.state.user`.
+![alt text](image-3.png)8ter ships with a minimal but flexible authentication layer.
+You provide two repos — `SessionRepo` and `UserRepo` — and ![alt text](image-3.png)8ter wires them into middleware that sets `request.state.user`.
 
 #### Setup in AppBuilder
 
