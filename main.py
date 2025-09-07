@@ -1,20 +1,13 @@
-from z8ter.core import Z8ter
-from z8ter.config import build_config
-from z8ter.errors import register_exception_handlers
-from z8ter.db import init_db
+from z8ter.builders.app_builder import AppBuilder
 
-init_db()
-config = build_config(".env")
-
-
-def create_app() -> Z8ter:
-    app = Z8ter(
-        debug=False,
-        mode=config('Z8_MODE')
-        )
-    register_exception_handlers(app)
-    return app
+app_builder = AppBuilder()
+app_builder.use_config(".env")
+app_builder.use_templating()
+app_builder.use_vite()
+app_builder.use_sessions()
+app_builder.use_authentication()
+app_builder.use_errors()
 
 
 if __name__ == "__main__":
-    app = create_app()
+    app = app_builder.build()

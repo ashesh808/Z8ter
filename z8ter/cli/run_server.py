@@ -39,7 +39,7 @@ def run_server(
             f"🚀 PROD: The host has been set to {host} and reload: {reload}"
         )
     uvicorn.run(
-        "main:create_app",
+        "main:app_builder.build",
         factory=True,
         host=host,
         port=port,

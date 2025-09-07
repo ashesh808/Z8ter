@@ -1,4 +1,4 @@
-export type Theme = "luxury" | "light";
+export type Theme = "cooperate" | "night";
 const THEME_KEY = "z8_theme";
 
 export function applyTheme(theme: Theme) {
@@ -9,8 +9,8 @@ export function applyTheme(theme: Theme) {
 export function getInitialTheme(): Theme {
   try {
     const t = localStorage.getItem(THEME_KEY);
-    if (t === "luxury" || t === "light") return t;
+    if (t === "cooperate" || t === "night") return t;
   } catch {}
   const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
-  return prefersDark ? "luxury" : "light";
+  return prefersDark ? "cooperate" : "night";
 }

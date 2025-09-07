@@ -1,4 +1,4 @@
-from starlette.responses import JSONResponse
+from z8ter.responses import JSONResponse
 from starlette.exceptions import HTTPException
 
 

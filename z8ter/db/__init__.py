@@ -23,19 +23,3 @@ def get_conn() -> sqlite3.Connection:
     conn.execute("PRAGMA synchronous = NORMAL;")
     conn.execute("PRAGMA busy_timeout = 5000;")
     return conn
-
-
-def init_db():
-    """Create tables if they don't exist (idempotent)."""
-    ddl = """
-    CREATE TABLE IF NOT EXISTS users (
-      id TEXT PRIMARY KEY,
-      email TEXT NOT NULL UNIQUE,
-      password_hash TEXT NOT NULL,
-      email_verified_at TIMESTAMP NULL,
-      deactivated_at TIMESTAMP NULL,
-      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-    );
-    """
-    with get_conn() as conn:
-        conn.executescript(ddl)

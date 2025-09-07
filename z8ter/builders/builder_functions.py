@@ -1,0 +1,125 @@
+from __future__ import annotations
+from dataclasses import dataclass, field
+from typing import Any, Callable, Dict, List, Optional
+from starlette.datastructures import URLPath
+from z8ter.core import Z8ter
+from z8ter.config import build_config
+from z8ter.errors import register_exception_handlers
+from z8ter.vite import vite_script_tag
+from z8ter import get_templates
+from z8ter.auth.middleware import AuthSessionMiddleware
+
+
+# ---------------------------
+# Builder step specification
+# ---------------------------
+
+BuilderFunc = Callable[[Dict[str, Any]], None]
+
+
+@dataclass
+class BuilderStep:
+    name: str
+    func: BuilderFunc
+    requires: List[str] = field(default_factory=list)
+    idempotent: bool = False
+    kwargs: Dict[str, Any] = field(default_factory=dict)
+
+
+# ---------------------------
+# Small helper utilities
+# ---------------------------
+
+def _ensure_services(context: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Canonical per-app service registry lives in context['services']
+    and is mirrored to app.state.services.
+    """
+    services = context.setdefault("services", {})
+    app: Z8ter = context["app"]
+    state = app.starlette_app.state
+    if not hasattr(state, "services"):
+        state.services = services
+    return services
+
+
+def use_service_builder(context: dict) -> None:
+    """
+    Register an object as a named service in the app.
+    Stored in both context['services'] and app.state.services.
+    """
+    app: Z8ter = context["app"]
+    services: dict[str, object] = context.setdefault("services", {})
+    obj = context["obj"]
+    replace: bool = context.get("replace", False)
+    key = (obj.__class__.__name__).rstrip("_").lower()
+    if key in services and not replace:
+        raise RuntimeError(
+            f"Z8ter: service '{key}' already registered. "
+            f"Pass replace=True to override."
+        )
+    services[key] = obj
+    state = app.starlette_app.state
+    if not hasattr(state, "services"):
+        state.services = services
+    state.services[key] = obj
+
+
+# ---------------------------
+# Builder functions (fn(context) -> None)
+# ---------------------------
+
+def use_config_builder(context: Dict[str, Any]) -> None:
+    envfile = context.get("envfile", ".env")
+    config = build_config(env_file=envfile)
+    context["config"] = config
+    services = _ensure_services(context)
+    services["config"] = config
+
+
+def use_templating_builder(context: Dict[str, Any]) -> None:
+    app: Z8ter = context["app"]
+    templates = get_templates()
+
+    def _url_for(
+            name: str,
+            filename: Optional[str] = None,
+            **params: Any
+    ) -> str:
+        if filename is not None:
+            params["path"] = filename
+        path: URLPath = app.starlette_app.url_path_for(name, **params)
+        return str(path)
+    templates.env.globals["url_for"] = _url_for
+    context["templates"] = templates
+    services = _ensure_services(context)
+    services["templates"] = templates
+
+
+def use_vite_builder(context: Dict[str, Any]) -> None:
+    templates = context.get("templates")
+    if not templates:
+        raise RuntimeError(
+            "Z8ter: 'vite' requires 'templating'. "
+            "Call use_templating() before use_vite()."
+        )
+    templates.env.globals["vite_script_tag"] = vite_script_tag
+
+
+def use_errors_builder(context: Dict[str, Any]) -> None:
+    app: Z8ter = context["app"]
+    register_exception_handlers(app)
+
+
+def use_authentication_builder(context: Dict[str, Any]) -> None:
+    app: Z8ter = context["app"]
+    services = _ensure_services(context)
+    if not services.get("sessions_enabled"):
+        raise RuntimeError(
+            "Z8ter: 'auth' requires 'sessions'."
+            "Call use_sessions() before use_authentication()."
+        )
+    if getattr(app.starlette_app, "_z8_auth_added", False):
+        return
+    app.starlette_app.add_middleware(AuthSessionMiddleware)
+    setattr(app.starlette_app, "_z8_auth_added", True)

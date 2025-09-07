@@ -1,6 +1,6 @@
 This favicon was generated using the following font:
 
-- Font Title: Libertinus Mono
+- Font Title: Lobster
 - Font Author: undefined
-- Font Source: https://fonts.gstatic.com/s/libertinusmono/v1/_gPg1RnxrjY_TDm97ApTqwneJJFToBF3YROW_w.ttf
+- Font Source: https://fonts.gstatic.com/s/lobster/v31/neILzCirqoswsqX9_oWsMqEzSJQ.ttf
 - Font License: undefined)

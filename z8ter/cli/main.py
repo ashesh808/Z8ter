@@ -40,6 +40,7 @@ def main():
     args = parser.parse_args()
     if args.cmd == "create_page":
         create_page(args.name)
+        print("Your new page has been created")
     elif args.cmd == "create_api":
         create_api(args.name)
     elif args.cmd == "new":

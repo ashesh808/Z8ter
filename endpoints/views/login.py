@@ -1,10 +1,14 @@
+from starlette.datastructures import FormData
 from z8ter.endpoints.view import View
 from z8ter.requests import Request
 from z8ter.responses import Response, RedirectResponse
-from z8ter.db import get_conn
-from z8ter.auth.repo import get_user_email
 from z8ter.auth.crypto import verify_password
-from starlette.datastructures import FormData
+from app.identity.usecases.manage_sessions import (
+    start_session, set_session_cookie
+)
+from app.identity.usecases.manage_users import (
+    get_user_email
+)
 
 
 class Login(View):
@@ -17,13 +21,15 @@ class Login(View):
             raise TypeError("Form data is None")
         email = str(form.get("email") or "").strip()
         pwd = str(form.get("password") or "")
-        conn = get_conn()
-        user = get_user_email(conn, email)
+        user = get_user_email(email)
         if user is None:
             return RedirectResponse(
                 "/login?e=badcreds", status_code=303
             )
         ok = verify_password(user["password_hash"], pwd)
-        return RedirectResponse(
-            "/" if ok else "/login?e=badcreds", status_code=303
-        )
+        if not ok:
+            return RedirectResponse("/login?e=badcreds", status_code=303)
+        sid = start_session(user["id"])
+        resp = RedirectResponse("/app", status_code=303)
+        set_session_cookie(resp, sid, secure=False)
+        return resp
