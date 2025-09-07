@@ -1,5 +1,4 @@
-# Z8ter.py
-
+# ![alt text](image.png)
 **Z8ter** is a lightweight, Laravel-inspired full-stack Python web framework built on [Starlette], designed for rapid development with tight integration between backend logic and frontend templates—plus small client-side “islands” where they make sense.
 
 ```mermaid
@@ -66,7 +65,7 @@ flowchart LR
 ```
 ---
 
-## ✨ Features (Current)
+## Features
 
 ### 1) File-Based Views (SSR)
 - Files under `views/` become routes automatically.
@@ -94,7 +93,7 @@ flowchart LR
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Python 3.11+ and `pip`
@@ -118,7 +117,7 @@ npm run dev
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 .
@@ -139,7 +138,7 @@ npm run dev
 
 ---
 
-## 🧩 Usage Examples
+## Usage Examples
 
 ### View + Template (SSR)
 
@@ -221,13 +220,13 @@ builder.use_authentication()  # middleware populates request.state.user
 
 ---
 
-## 🛣️ Planned
+##  Planned
 * **Stripe integration**: pricing page, checkout routes, webhooks
 * **DB adapters**: SQLite default, Postgres option
 
 ---
 
-## 🧠 Philosophy
+## Philosophy
 
 * Conventions over configuration
 * SSR with CSR islands
