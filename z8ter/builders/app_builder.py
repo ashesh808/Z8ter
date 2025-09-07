@@ -12,6 +12,7 @@ from z8ter.route_builders import (
 from z8ter.builders.builder_functions import (
     BuilderStep,
     use_service_builder,
+    publish_auth_repos_builder,
     use_authentication_builder,
     use_templating_builder,
     use_vite_builder,
@@ -78,11 +79,22 @@ class AppBuilder:
             idempotent=True,
         ))
 
+    def use_auth_repos(
+            self, *, session_repo: object, user_repo: object
+    ) -> None:
+        self.builder_queue.append(BuilderStep(
+            name="auth_repos",
+            func=publish_auth_repos_builder,
+            requires=[],
+            idempotent=True,
+            kwargs={"session_repo": session_repo, "user_repo": user_repo},
+        ))
+
     def use_authentication(self) -> None:
         self.builder_queue.append(BuilderStep(
             name="auth",
             func=use_authentication_builder,
-            requires=["sessions"],
+            requires=["auth_repos"],
             idempotent=True,
         ))
 
@@ -123,10 +135,16 @@ class AppBuilder:
             missing = [r for r in step.requires if r not in applied]
             if missing:
                 need = ", ".join(missing)
+                hint = ""
+                if "auth_repos" in missing and step.name == "auth":
+                    hint = " → "
+                    "Call use_auth_repos(session_repo=..., user_repo=...) "
+                    "before use_authentication()."
+                elif "sessions" in missing and step.name == "auth":
+                    hint = " → "
+                    "Call use_sessions() before use_authentication()."
                 raise RuntimeError(
-                    f"Z8ter: step '{step.name}' requires [{need}]. "
-                    "Adjust your builder calls "
-                    f"(e.g., call use_{missing[0]}() first)."
+                    f"Z8ter: step '{step.name}' requires [{need}].{hint}"
                 )
             if step.kwargs:
                 context.update(step.kwargs)

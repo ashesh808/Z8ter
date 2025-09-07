@@ -1,27 +1,11 @@
-import hmac
-import hashlib
-from datetime import datetime, timezone
+from __future__ import annotations
 from typing import Optional
-from z8ter.db import get_conn
+from datetime import datetime, timezone
 
 
-def _utcnow(): return datetime.now(timezone.utc)
-def _iso(dt): return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-class SidHasher:
-    def __init__(self, key: bytes, k_id: str = "k1"):
-        self.key, self.k_id = key, k_id
-
-    def hash(self, sid_plain: str) -> str:
-        return hmac.new(
-            self.key, sid_plain.encode(), hashlib.sha256
-        ).hexdigest()
-
-
-class SessionRepo:
-    def __init__(self, hasher: SidHasher):
-        self.hasher = hasher
+class InMemorySessionRepo:
+    def __init__(self) -> None:
+        self._sessions: dict[str, dict] = {}
 
     def insert(
         self,
@@ -34,53 +18,31 @@ class SessionRepo:
         user_agent: Optional[str],
         rotated_from_sid: Optional[str] = None,
     ) -> None:
-        sid_hash = self.hasher.hash(sid_plain)
-        rotated_from_hash = (
-            self.hasher.hash(rotated_from_sid) if rotated_from_sid else None
-        )
-
-        with get_conn() as c:
-            c.execute(
-                """
-                INSERT INTO sessions (
-                    sid_hash,
-                    user_id,
-                    created_at,
-                    expires_at,
-                    remember,
-                    ip,
-                    user_agent,
-                    rotated_from_sid_hash,
-                    revoked_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)
-                """,
-                (
-                    sid_hash,
-                    user_id,
-                    _iso(_utcnow()),
-                    _iso(expires_at),
-                    int(remember),
-                    ip,
-                    user_agent,
-                    rotated_from_hash,
-                ),
-            )
+        self._sessions[sid_plain] = {
+            "user_id": user_id,
+            "expires_at": expires_at,
+            "remember": remember,
+            "ip": ip,
+            "user_agent": user_agent,
+            "revoked_at": None,
+            "rotated_from_sid": rotated_from_sid,
+        }
 
     def revoke(self, *, sid_plain: str) -> bool:
-        sid_hash = self.hasher.hash(sid_plain)
-        with get_conn() as c:
-            cur = c.execute(
-                "UPDATE sessions SET revoked_at=? WHERE sid_hash=? AND "
-                "revoked_at IS NULL",
-                (_iso(_utcnow()), sid_hash),
-            )
-            return cur.rowcount > 0
+        session = self._sessions.get(sid_plain)
+        if not session:
+            return False
+        if session["revoked_at"] is not None:
+            return False
+        session["revoked_at"] = datetime.now(timezone.utc)
+        return True
 
-    def get_user_id(self, sid) -> str:
-        with get_conn() as c:
-            c.execute(
-                "UPDATE sessions SET revoked_at=? WHERE sid_hash=? AND "
-                "revoked_at IS NULL",
-                (_iso(_utcnow()), sid),
-            )
-            return "user_id"
+    def get_user_id(self, sid_plain: str) -> Optional[str]:
+        session = self._sessions.get(sid_plain)
+        if not session:
+            return None
+        if session["revoked_at"] is not None:
+            return None
+        if session["expires_at"] <= datetime.now(timezone.utc):
+            return None
+        return session["user_id"]

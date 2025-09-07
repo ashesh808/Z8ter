@@ -1,7 +1,7 @@
 from typing import Any
 from starlette.middleware.base import BaseHTTPMiddleware
-from z8ter.db.session_repo import SessionRepo
-from z8ter.db.user_repo import UserRepo
+from z8ter.auth.contracts import SessionRepo
+from z8ter.auth.contracts import UserRepo
 
 
 class AuthSessionMiddleware(BaseHTTPMiddleware):

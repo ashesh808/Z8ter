@@ -111,14 +111,29 @@ def use_errors_builder(context: Dict[str, Any]) -> None:
     register_exception_handlers(app)
 
 
+def publish_auth_repos_builder(context: dict[str, Any]) -> None:
+    app = context["app"]
+    services = context.setdefault("services", {})
+    session_repo = context["session_repo"]
+    user_repo = context["user_repo"]
+    for name, repo, methods in [
+        ("session_repo", session_repo, ["insert", "revoke", "get_user_id"]),
+        ("user_repo", user_repo, ["get_user_by_id"]),
+    ]:
+        for m in methods:
+            if not hasattr(repo, m):
+                raise RuntimeError(
+                    f"Z8ter: {name} missing required method '{m}'. "
+                    f"Provided object: {repo.__class__.__name__}"
+                )
+    app.starlette_app.state.session_repo = session_repo
+    app.starlette_app.state.user_repo = user_repo
+    services["session_repo"] = session_repo
+    services["user_repo"] = user_repo
+
+
 def use_authentication_builder(context: Dict[str, Any]) -> None:
     app: Z8ter = context["app"]
-    services = _ensure_services(context)
-    if not services.get("sessions_enabled"):
-        raise RuntimeError(
-            "Z8ter: 'auth' requires 'sessions'."
-            "Call use_sessions() before use_authentication()."
-        )
     if getattr(app.starlette_app, "_z8_auth_added", False):
         return
     app.starlette_app.add_middleware(AuthSessionMiddleware)
