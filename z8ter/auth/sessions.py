@@ -6,7 +6,7 @@ from z8ter.auth.contracts import SessionRepo
 
 class SessionManager:
     def __init__(self, session_repo: SessionRepo):
-        self.cookie_name = "z8_sid"
+        self.cookie_name = "z8_auth_sid"
         self.session_repo = session_repo
 
     async def start_session(

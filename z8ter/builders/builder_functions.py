@@ -2,6 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional
 from starlette.datastructures import URLPath
+from starlette.middleware.sessions import SessionMiddleware
 from z8ter.core import Z8ter
 from z8ter.config import build_config
 from z8ter.errors import register_exception_handlers
@@ -29,6 +30,31 @@ class BuilderStep:
 # ---------------------------
 # Small helper utilities
 # ---------------------------
+
+
+def _get_config_value(
+        context: dict[str, Any], key: str, default: str | None = None
+) -> Any:
+    """
+    Fetch a config value from context["config"].
+    Works if config is a callable (config("KEY")) or a dict-like.
+    """
+    cfg = context.get("config")
+    if cfg is None:
+        return default
+    if callable(cfg):
+        try:
+            return cfg(key)
+        except Exception:
+            return default
+    try:
+        return cfg.get(key, default)
+    except AttributeError:
+        try:
+            return cfg[key]
+        except Exception:
+            return default
+
 
 def _ensure_services(context: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -130,6 +156,23 @@ def publish_auth_repos_builder(context: dict[str, Any]) -> None:
     app.starlette_app.state.user_repo = user_repo
     services["session_repo"] = session_repo
     services["user_repo"] = user_repo
+
+
+def use_app_sessions_builder(context: dict[str, Any]) -> None:
+    app = context["app"]
+    secret_key = _get_config_value(
+        context=context, key="APP_SESSION_KEY"
+    )
+    secret_key = context.get("secret_key") or secret_key
+    if secret_key is None:
+        raise TypeError("Secret key cannot be none for using app sessions.")
+    app.starlette_app.add_middleware(
+        SessionMiddleware,
+        secret_key=secret_key,
+        session_cookie="z8_app_sess",
+        max_age=60*60*24*7,
+        same_site="lax"
+    )
 
 
 def use_authentication_builder(context: Dict[str, Any]) -> None:

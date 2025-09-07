@@ -18,6 +18,7 @@ from z8ter.builders.builder_functions import (
     use_vite_builder,
     use_config_builder,
     use_errors_builder,
+    use_app_sessions_builder
 )
 
 
@@ -90,6 +91,17 @@ class AppBuilder:
             kwargs={"session_repo": session_repo, "user_repo": user_repo},
         ))
 
+    def use_app_sessions(
+            self, *, secret_key: str | None = None
+    ) -> None:
+        self.builder_queue.append(BuilderStep(
+            name="app_sessions",
+            func=use_app_sessions_builder,
+            requires=[],
+            idempotent=True,
+            kwargs={"secret_key": secret_key},
+        ))
+
     def use_authentication(self) -> None:
         self.builder_queue.append(BuilderStep(
             name="auth",
@@ -140,9 +152,6 @@ class AppBuilder:
                     hint = " → "
                     "Call use_auth_repos(session_repo=..., user_repo=...) "
                     "before use_authentication()."
-                elif "sessions" in missing and step.name == "auth":
-                    hint = " → "
-                    "Call use_sessions() before use_authentication()."
                 raise RuntimeError(
                     f"Z8ter: step '{step.name}' requires [{need}].{hint}"
                 )

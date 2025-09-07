@@ -12,6 +12,7 @@ app_builder.use_auth_repos(
 )
 app_builder.use_authentication()
 app_builder.use_errors()
+app_builder.use_app_sessions()
 
 if __name__ == "__main__":
     app = app_builder.build()

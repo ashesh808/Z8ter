@@ -8,20 +8,20 @@
     <nav aria-label="Primary" class="text-sm">
       <ul class="flex items-center gap-4">
         <li>
-          <a href="/register"
-             class="px-2 py-1 rounded-md hover:text-primary focus:outline-none focus-visible:ring"
-             {% if page_id and page_id.startswith('register') %} aria-current="page" class="text-primary font-semibold px-2 py-1 rounded-md"{% endif %}>
-            Register
-          </a>
-          <a href="/login"
-             class="px-2 py-1 rounded-md hover:text-primary focus:outline-none focus-visible:ring"
-             {% if page_id and page_id.startswith('login') %} aria-current="page" class="text-primary font-semibold px-2 py-1 rounded-md"{% endif %}>
-            Login
-          </a>
           <a href="/about"
              class="px-2 py-1 rounded-md hover:text-primary focus:outline-none focus-visible:ring"
              {% if page_id and page_id.startswith('about') %} aria-current="page" class="text-primary font-semibold px-2 py-1 rounded-md"{% endif %}>
             About
+          </a>
+          <a href="/login"
+             class="px-2 py-1 rounded-md hover:text-primary focus:outline-none focus-visible:ring"
+             {% if page_id and page_id.startswith('login') %} aria-current="page" class="text-primary font-semibold px-2 py-1 rounded-md"{% endif %}>
+            Sign In
+          </a>
+          <a href="/register"
+             class="px-2 py-1 rounded-md hover:text-primary focus:outline-none focus-visible:ring border"
+             {% if page_id and page_id.startswith('register') %} aria-current="page" class="text-primary font-semibold px-2 py-1 rounded-md"{% endif %}>
+            Sign Up
           </a>
         </li>
       </ul>
