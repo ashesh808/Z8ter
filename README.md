@@ -25,7 +25,7 @@ flowchart LR
     MW2["Auth Middleware\n→ sets request.state.user"]:::accent
     Router["File-based Router\nviews/, api/"]:::box
 
-    subgraph SSR[SSR]
+    subgraph SSR[Views]
       Tmpl["Jinja2 Engine"]:::box
     end
 
@@ -217,39 +217,6 @@ builder.use_auth_repos(
 )
 
 builder.use_authentication()  # middleware populates request.state.user
-```
-
-#### Creating a User
-
-```python
-# manage_user.py
-from manage_user import create_user
-
-uid = create_user("alice@example.com", "secret123")
-```
-
-#### Starting a Session
-
-```python
-# manage_sessions.py
-from manage_sessions import start_session, set_session_cookie
-from z8ter.responses import RedirectResponse
-
-async def login(request):
-    uid = "alice@example.com"
-    sid = await start_session(uid)
-    resp = RedirectResponse("/app")
-    await set_session_cookie(resp, sid, secure=False)
-    return resp
-```
-
-#### Middleware Access
-
-```python
-async def protected(request):
-    if not request.state.user:
-        return RedirectResponse("/login")
-    return JSONResponse({"ok": True, "user": request.state.user})
 ```
 
 ---
