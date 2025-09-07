@@ -2,6 +2,68 @@
 
 **Z8ter** is a lightweight, Laravel-inspired full-stack Python web framework built on [Starlette], designed for rapid development with tight integration between backend logic and frontend templates—plus small client-side “islands” where they make sense.
 
+```mermaid
+flowchart LR
+  %% --------- Style (GitHub-friendly) ---------
+  classDef box fill:#1113,stroke:#888,rx:6,ry:6,color:#eee
+  classDef key fill:#2563eb,stroke:#1e40af,color:#fff,rx:6,ry:6
+  classDef accent fill:#059669,stroke:#047857,color:#fff,rx:6,ry:6
+  classDef warn fill:#dc2626,stroke:#991b1b,color:#fff,rx:6,ry:6
+  linkStyle default stroke:#94a3b8,color:#94a3b8
+
+  %% --------- Browser ---------
+  subgraph B[🌐 Browser]
+    Bhtml["HTML (Jinja)"]:::box
+    Bisland["JS Island (if page_id)"]:::box
+    Bcookie["Cookie z8_sid"]:::key
+  end
+
+  %% --------- Z8ter App ---------
+  subgraph Z[⚡ Z8ter App]
+    direction TB
+    MW1["Session Middleware"]:::box
+    MW2["Auth Middleware\n→ sets request.state.user"]:::accent
+    Router["File-based Router\nviews/, api/"]:::box
+
+    subgraph SSR[SSR]
+      Tmpl["Jinja2 Engine"]:::box
+    end
+
+    subgraph API[APIs]
+      Deco["Decorator-driven Endpoints"]:::box
+    end
+
+    subgraph Auth[Auth Backends]
+      URepo["UserRepo (pluggable)"]:::box
+      SRepo["SessionRepo (pluggable)"]:::box
+    end
+
+    Err["Global Exception Handlers"]:::warn
+  end
+
+  %% --------- Assets (optional) ---------
+  A["Vite / Static Assets"]:::box
+
+  %% --------- Request path ---------
+  B -->|"HTTP Request"| MW1 --> MW2 --> Router
+  Router -->|SSR| Tmpl -->|"HTML"| Bhtml
+  Router -->|API| Deco -->|"JSON"| Bhtml
+  B -- "Hydrate" --> Bisland
+
+  %% --------- Cookies & Identity ---------
+  MW2 <-->|read/write SID| Bcookie
+  MW2 -->|lookup| SRepo
+  MW2 -->|load user| URepo
+
+  %% --------- Errors ---------
+  Router --> Err -->|"JSON error"| Bhtml
+  Tmpl --> Err
+  Deco --> Err
+
+  %% --------- Assets ---------
+  Bhtml -->|"links/scripts"| A
+
+```
 ---
 
 ## ✨ Features (Current)
@@ -15,7 +77,7 @@
 - Template inheritance with `{% extends %}` / `{% block %}`.
 - Templates live in `templates/` (default extension: `.jinja`).
 
-### 3) Small CSR “Islands”
+### 3) CSR “Islands”
 - A tiny client router lazy-loads `/static/js/pages/<page_id>.js` and runs its default export.
 - Great for interactive bits (theme toggles, pings, clipboard, etc.) without going full SPA.
 
@@ -111,20 +173,95 @@ class Hello(API):
         return {"ok": True, "message": "Hello from Z8ter"}
 ```
 
+### Main Application (bootstrapping Z8ter)
+
+Your app entrypoint defines the pipeline of features by chaining builder steps.
+This example shows a minimal project with templating, Vite, and authentication wired in.
+
+```python
+# main.py
+from z8ter.builders.app_builder import AppBuilder
+from app.identity.data.session_repo import InMemorySessionRepo
+from app.identity.data.user_repo import InMemoryUserRepo
+
+app_builder = AppBuilder()
+app_builder.use_config(".env")             # load environment config
+app_builder.use_templating()               # enable Jinja2 templates
+app_builder.use_vite()                     # dev/prod asset handling
+app_builder.use_auth_repos(                # provide your own repos
+    session_repo=InMemorySessionRepo(),
+    user_repo=InMemoryUserRepo()
+)
+app_builder.use_authentication()           # auth middleware + request.state.user
+app_builder.use_errors()                   # global JSON error handlers
+
+if __name__ == "__main__":
+    app = app_builder.build()
+```
+
+### Authentication (Sessions + Users)
+
+Z8ter ships with a minimal but flexible authentication layer.
+You provide two repos — `SessionRepo` and `UserRepo` — and Z8ter wires them into middleware that sets `request.state.user`.
+
+#### Setup in AppBuilder
+
+```python
+from z8ter.auth.inmemory_repos import InMemorySessionRepo, InMemoryUserRepo
+
+builder.use_sessions()  # enables secure cookie handling
+
+builder.use_auth_repos(
+    session_repo=InMemorySessionRepo(),
+    user_repo=InMemoryUserRepo()
+)
+
+builder.use_authentication()  # middleware populates request.state.user
+```
+
+#### Creating a User
+
+```python
+# manage_user.py
+from manage_user import create_user
+
+uid = create_user("alice@example.com", "secret123")
+```
+
+#### Starting a Session
+
+```python
+# manage_sessions.py
+from manage_sessions import start_session, set_session_cookie
+from z8ter.responses import RedirectResponse
+
+async def login(request):
+    uid = "alice@example.com"
+    sid = await start_session(uid)
+    resp = RedirectResponse("/app")
+    await set_session_cookie(resp, sid, secure=False)
+    return resp
+```
+
+#### Middleware Access
+
+```python
+async def protected(request):
+    if not request.state.user:
+        return RedirectResponse("/login")
+    return JSONResponse({"ok": True, "user": request.state.user})
+```
+
 ---
 
 ## 🛣️ Planned
-
-* **CLI scaffolding**: `z8 new`, `z8 dev`, `z8 create_page <name>`
-* **Auth scaffolding**: login/register/logout + session helpers
 * **Stripe integration**: pricing page, checkout routes, webhooks
 * **DB adapters**: SQLite default, Postgres option
-* **HTMX + Tailwind/DaisyUI** polish out of the box
 
 ---
 
 ## 🧠 Philosophy
 
 * Conventions over configuration
-* SSR-first with tiny CSR islands
+* SSR with CSR islands
 * Small surface area; sharp, pragmatic tools
