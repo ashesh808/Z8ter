@@ -172,7 +172,7 @@ class Hello(API):
         return {"ok": True, "message": "Hello from Z8ter"}
 ```
 
-### Main Application (bootstrapping ![alt text](image-3.png)8ter)
+### Main Application (bootstrapping ![alt text](z8ter.png)8ter)
 
 Your app entrypoint defines the pipeline of features by chaining builder steps.
 This example shows a minimal project with templating, Vite, and authentication wired in.
