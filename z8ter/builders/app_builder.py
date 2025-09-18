@@ -22,6 +22,11 @@ from z8ter.builders.builder_functions import (
 )
 
 
+def _service_key(obj) -> str:
+    # choose one: obj.name, obj.key, obj.__class__.__name__, or explicit param
+    return getattr(obj, "name", obj.__class__.__name__)
+
+
 class AppBuilder:
     def __init__(self) -> None:
         self.routes: list[Route] = []
@@ -47,11 +52,12 @@ class AppBuilder:
     # -- Enqueue feature steps (FIFO). kwargs merged into context at build.
 
     def use_service(self, obj: object, *, replace: bool = False) -> None:
+        key = _service_key(obj)
         self.builder_queue.append(BuilderStep(
-            name="service",
+            name=f"service:{key}",
             func=use_service_builder,
             requires=[],
-            idempotent=False,
+            idempotent=True,
             kwargs={"obj": obj, "replace": replace},
         ))
 

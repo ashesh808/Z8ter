@@ -1,6 +1,6 @@
 from z8ter.builders.app_builder import AppBuilder
-from app.identity.data.session_repo import InMemorySessionRepo
-from app.identity.data.user_repo import InMemoryUserRepo
+from app.identity.adapter.session_repo import InMemorySessionRepo
+from app.identity.adapter.user_repo import InMemoryUserRepo
 
 app_builder = AppBuilder()
 app_builder.use_config(".env")
