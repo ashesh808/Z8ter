@@ -5,6 +5,4 @@ from z8ter.responses import Response
 
 class About(View):
     async def get(self, request: Request) -> Response:
-        return self.render(
-            request, "pages/about.jinja", {}
-        )
+        return self.render(request, "pages/about.jinja", {})

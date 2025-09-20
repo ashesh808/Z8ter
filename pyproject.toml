@@ -45,6 +45,20 @@ z8 = "z8ter.cli.main:main"
 Homepage = "https://github.com/ashesh808/Z8ter"
 Issues = "https://github.com/ashesh808/Z8ter/issues"
 
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+extend-select = [
+  "B",
+  "D",
+  "C90",
+  "UP",
+  "S",
+]
+ignore = []
+
 [tool.setuptools]
 include-package-data = true
 

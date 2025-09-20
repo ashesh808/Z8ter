@@ -1,11 +1,12 @@
 from starlette.datastructures import FormData
-from z8ter.endpoints.view import View
-from z8ter.requests import Request
-from z8ter.responses import Response, RedirectResponse
-from z8ter.auth.crypto import verify_password
-from z8ter.auth.guards import skip_if_authenticated
+
 from app.identity.usecases.manage_sessions import ManageSessions
 from app.identity.usecases.manage_users import ManageUsers
+from z8ter.auth.crypto import verify_password
+from z8ter.auth.guards import skip_if_authenticated
+from z8ter.endpoints.view import View
+from z8ter.requests import Request
+from z8ter.responses import RedirectResponse, Response
 
 
 class Login(View):
@@ -24,9 +25,7 @@ class Login(View):
         pwd = str(form.get("password") or "")
         user = await mu.get_user_email(email)
         if user is None:
-            return RedirectResponse(
-                "/login?e=badcreds", status_code=303
-            )
+            return RedirectResponse("/login?e=badcreds", status_code=303)
         ok = verify_password(user["pwd_hash"], pwd)
         if not ok:
             return RedirectResponse("/login?e=badcreds", status_code=303)

@@ -5,7 +5,7 @@ import path from "node:path";
 export default defineConfig({
   plugins: [solid()],
   appType: "custom",
-  base: "/static/js", 
+  base: "/static/js",
   build: {
     outDir: "static/js",
     assetsDir: "assets",

@@ -1,8 +1,8 @@
-from z8ter.endpoints.view import View
-from z8ter.requests import Request
-from z8ter.responses import Response, RedirectResponse
 from app.identity.usecases.manage_users import ManageUsers
 from z8ter.auth.guards import skip_if_authenticated
+from z8ter.endpoints.view import View
+from z8ter.requests import Request
+from z8ter.responses import RedirectResponse, Response
 
 
 class Register(View):

@@ -1,20 +1,25 @@
-"""
-z8ter.responses
+"""Z8ter response classes.
 
-Re-exports Starlette's response classes. Identical today, but may
-gain enhancements in future Z8ter releases.
+This module re-exports Starlette's core `Response` classes so that
+applications can import from `z8ter.responses` instead of depending
+on Starlette directly. This creates a stable abstraction layer where
+Z8ter can later:
+  - Add defaults (e.g., headers, encoding).
+  - Provide custom response subclasses.
+  - Swap implementations without breaking app code.
+
+Today these are identical to Starlette's responses.
 """
 
 from starlette.responses import (
-    Response,
-    JSONResponse,
+    FileResponse,
     HTMLResponse,
+    JSONResponse,
     PlainTextResponse,
     RedirectResponse,
-    FileResponse,
+    Response,
     StreamingResponse,
 )
-
 
 __all__ = [
     "Response",

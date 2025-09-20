@@ -1,6 +1,7 @@
 from __future__ import annotations
-from typing import Optional
+
 from datetime import datetime, timezone
+from typing import Optional
 
 
 class InMemorySessionRepo:
