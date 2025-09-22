@@ -12,6 +12,7 @@ from starlette.applications import Starlette
 from starlette.types import Receive, Scope, Send
 
 logger = logging.getLogger("z8ter")
+ALLOWED_MODES = {"dev", "prod", "test"}
 
 
 class Z8ter:
@@ -49,14 +50,22 @@ class Z8ter:
     ) -> None:
         """Initialize Z8ter apps, this should only be done via the App builder."""
         self.starlette_app = starlette_app
-        self.state = starlette_app.state
         self.mode: str = (mode or "prod").lower()
+        if self.mode not in ALLOWED_MODES:
+            raise ValueError(
+                f"Unknown mode '{self.mode}'. Allowed: {sorted(ALLOWED_MODES)}"
+            )
         if debug is None:
             self.debug = self.mode == "dev"
         else:
             self.debug = bool(debug)
         if self.debug:
             logger.warning("🧪 Z8ter running in DEBUG mode")
+
+    @property
+    def state(self):
+        """Forward ASGI calls directly to the underlying Starlette app."""
+        return self.starlette_app.state
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         """Forward ASGI calls directly to the underlying Starlette app.

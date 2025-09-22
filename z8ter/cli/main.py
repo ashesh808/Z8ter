@@ -1,4 +1,3 @@
-# z8ter/cli/main.py
 """Z8ter command-line interface.
 
 Commands:

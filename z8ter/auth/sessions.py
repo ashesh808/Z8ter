@@ -1,4 +1,3 @@
-# z8ter/auth/session.py
 """Session management for Z8ter.
 
 This module provides a high-level API for creating, revoking, and managing

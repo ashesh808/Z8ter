@@ -1,4 +1,3 @@
-# z8ter/cli/__init__.py
 """Z8ter CLI utilities and application directory resolution.
 
 This module centralizes how the CLI (and helpers) discover the current app

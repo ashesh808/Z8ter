@@ -20,8 +20,6 @@ Security:
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from dataclasses import dataclass, field
 from typing import Any
 
 from starlette.datastructures import URLPath
@@ -29,97 +27,11 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from z8ter import get_templates
 from z8ter.auth.middleware import AuthSessionMiddleware
+from z8ter.builders.helpers import ensure_services, get_config_value
 from z8ter.config import build_config
 from z8ter.core import Z8ter
 from z8ter.errors import register_exception_handlers
 from z8ter.vite import vite_script_tag
-
-# ---------------------------
-# Builder step specification
-# ---------------------------
-
-BuilderFunc = Callable[[dict[str, Any]], None]
-
-
-@dataclass
-class BuilderStep:
-    """A single build operation to be applied in the AppBuilder pipeline.
-
-    Attributes:
-        name: Unique identifier for the step. Used for dependency checks.
-        func: Callable that mutates the shared build context.
-        requires: Names of prior steps that must have been applied.
-        idempotent: If True, re-applying the same step is a no-op.
-        kwargs: Extra data merged into context before calling `func`.
-
-    """
-
-    name: str
-    func: BuilderFunc
-    requires: list[str] = field(default_factory=list)
-    idempotent: bool = False
-    kwargs: dict[str, Any] = field(default_factory=dict)
-
-
-# ---------------------------
-# Small helper utilities
-# ---------------------------
-
-
-def _get_config_value(
-    context: dict[str, Any], key: str, default: str | None = None
-) -> Any:
-    """Fetch a config value from `context["config"]`.
-
-    Supports both callable config accessors (e.g., `config("KEY")`) and
-    mapping-like objects (e.g., `dict`).
-
-    Args:
-        context: Shared build context.
-        key: Configuration key to read.
-        default: Fallback value if missing or on error.
-
-    Returns:
-        The resolved value or `default` if unavailable.
-
-    """
-    cfg = context.get("config")
-    if cfg is None:
-        return default
-    if callable(cfg):
-        try:
-            return cfg(key)
-        except Exception:
-            return default
-    try:
-        return cfg.get(key, default)  # type: ignore[union-attr]
-    except AttributeError:
-        try:
-            return cfg[key]  # type: ignore[index]
-        except Exception:
-            return default
-
-
-def _ensure_services(context: dict[str, Any]) -> dict[str, Any]:
-    """Ensure a canonical service registry exists and is mirrored to app state.
-
-    Side effects:
-        - Creates/returns `context["services"]`.
-        - Mirrors the dict to `app.starlette_app.state.services` if absent.
-
-    Args:
-        context: Shared build context.
-
-    Returns:
-        The service registry dict.
-
-    """
-    services = context.setdefault("services", {})
-    app: Z8ter = context["app"]
-    state = app.starlette_app.state
-    if not hasattr(state, "services"):
-        state.services = services
-    return services
 
 
 def use_service_builder(context: dict[str, Any]) -> None:
@@ -139,24 +51,33 @@ def use_service_builder(context: dict[str, Any]) -> None:
 
     """
     app: Z8ter = context["app"]
-    services: dict[str, object] = context.setdefault("services", {})
     obj = context["obj"]
-    replace: bool = context.get("replace", False)
-    key = (obj.__class__.__name__).rstrip("_").lower()
-    if key in services and not replace:
-        raise RuntimeError(
-            "Z8ter: service '{key}' already registered. Pass replace=True to override."
-        )
-    services[key] = obj
+    name = (context.get("name") or obj.__class__.__name__).rstrip("_").lower()
+    replace: bool = bool(context.get("replace", False))
+    services = context.setdefault("services", {})
     state = app.starlette_app.state
     if not hasattr(state, "services"):
         state.services = services
-    state.services[key] = obj
+    else:
+        services = state.services
 
+    if name in services and not replace:
+        raise RuntimeError(
+            f"Z8ter: service '{name}' already registered.Pass replace=True to override."
+        )
 
-# ---------------------------
-# Builder functions (fn(context) -> None)
-# ---------------------------
+    services[name] = obj
+    needs_config = hasattr(obj, "set_config") or hasattr(obj, "config")
+    if needs_config:
+        cfg = services.get("config")
+        if cfg is None:
+            raise RuntimeError(
+                f"Z8ter: cannot inject config into '{name}' before use_config()."
+            )
+        if hasattr(obj, "set_config"):
+            obj.set_config(cfg)
+        elif hasattr(obj, "config"):
+            obj.config = cfg
 
 
 def use_config_builder(context: dict[str, Any]) -> None:
@@ -172,7 +93,7 @@ def use_config_builder(context: dict[str, Any]) -> None:
     envfile = context.get("envfile", ".env")
     config = build_config(env_file=envfile)
     context["config"] = config
-    services = _ensure_services(context)
+    services = ensure_services(context)
     services["config"] = config
 
 
@@ -198,7 +119,7 @@ def use_templating_builder(context: dict[str, Any]) -> None:
 
     templates.env.globals["url_for"] = _url_for
     context["templates"] = templates
-    services = _ensure_services(context)
+    services = ensure_services(context)
     services["templates"] = templates
 
 
@@ -289,7 +210,7 @@ def use_app_sessions_builder(context: dict[str, Any]) -> None:
 
     """
     app = context["app"]
-    secret_key = _get_config_value(context=context, key="APP_SESSION_KEY")
+    secret_key = get_config_value(context=context, key="APP_SESSION_KEY")
     secret_key = context.get("secret_key") or secret_key
     if not secret_key:
         raise TypeError("Z8ter: secret key is required for app sessions.")

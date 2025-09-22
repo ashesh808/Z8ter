@@ -22,15 +22,16 @@ Notes:
 
 from __future__ import annotations
 
+import asyncio
 from collections import deque
 from collections.abc import Callable
+from contextlib import asynccontextmanager
 from typing import Any
 
 from starlette.applications import Starlette
 from starlette.routing import Mount, Route
 
 from z8ter.builders.builder_functions import (
-    BuilderStep,
     publish_auth_repos_builder,
     use_app_sessions_builder,
     use_authentication_builder,
@@ -40,27 +41,14 @@ from z8ter.builders.builder_functions import (
     use_templating_builder,
     use_vite_builder,
 )
+from z8ter.builders.builder_step import BuilderStep
+from z8ter.builders.helpers import service_key
 from z8ter.core import Z8ter
 from z8ter.route_builders import (
     build_file_route,
     build_routes_from_apis,
     build_routes_from_pages,
 )
-
-
-def _service_key(obj) -> str:
-    """Return a stable service key for DI service registration.
-
-    Prefers an explicit `name` attribute; falls back to the class name.
-
-    Args:
-        obj: Service instance being registered.
-
-    Returns:
-        str: The key under which the service is stored in context["services"].
-
-    """
-    return getattr(obj, "name", obj.__class__.__name__)
 
 
 class AppBuilder:
@@ -105,13 +93,9 @@ class AppBuilder:
         """
         routes: list[Route | Mount] = []
         routes += self.routes
-
-        # Mount static/file route if available (may be None in certain configs).
         file_mt = build_file_route()
         if file_mt:
             routes.append(file_mt)
-
-        # Add SSR page routes and API routes discovered from the filesystem.
         routes += build_routes_from_pages()
         routes += build_routes_from_apis()
         return routes
@@ -122,7 +106,7 @@ class AppBuilder:
         """Publish a service instance into the build context.
 
         Services are accessible at `context["services"][key]` where `key` comes
-        from `_service_key(obj)`.
+        from `service_key(obj)`.
 
         Args:
             obj: Service instance to publish.
@@ -133,7 +117,7 @@ class AppBuilder:
               unless `replace=True`.
 
         """
-        key = _service_key(obj)
+        key = service_key(obj)
         self.builder_queue.append(
             BuilderStep(
                 name=f"service:{key}",
@@ -265,16 +249,29 @@ class AppBuilder:
                 if required steps are missing when a step executes.
 
         """
+
+        @asynccontextmanager
+        async def lifespan(app):
+            # startup work here (db pools, templates, etc.)
+            try:
+                yield
+            except (asyncio.CancelledError, KeyboardInterrupt):
+                # Expected on Ctrl-C; keep it quiet.
+                pass
+            finally:
+                # shutdown work here
+                ...
+
         starlette_app = Starlette(
             debug=debug,
             routes=self._assemble_routes(),
+            lifespan=lifespan,
         )
         app = Z8ter(
             debug=debug,
             starlette_app=starlette_app,
         )
 
-        # Shared context for all builder steps. Steps may mutate it in place.
         context: dict[str, Any] = {
             "app": app,
             "services": {},
@@ -285,8 +282,6 @@ class AppBuilder:
 
         while self.builder_queue:
             step = self.builder_queue.popleft()
-
-            # Prevent duplicate application of non-idempotent steps.
             if step.name in applied:
                 if step.idempotent:
                     continue
@@ -301,8 +296,6 @@ class AppBuilder:
                 need = ", ".join(missing)
                 hint = ""
                 if "auth_repos" in missing and step.name == "auth":
-                    # FIX: Previously, string literals were separated across lines
-                    # without parentheses, so `hint` stayed as " → " only.
                     hint = (
                         " → Call use_auth_repos(session_repo=..., user_repo=...) "
                         "before use_authentication()."
@@ -310,12 +303,8 @@ class AppBuilder:
                 raise RuntimeError(
                     f"Z8ter: step '{step.name}' requires [{need}].{hint}"
                 )
-
-            # Merge step kwargs into context (last writer wins).
             if step.kwargs:
                 context.update(step.kwargs)
-
-            # Execute the builder function with the shared context.
             step.func(context)
             applied.add(step.name)
 

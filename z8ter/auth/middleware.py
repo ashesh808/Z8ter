@@ -87,22 +87,12 @@ class AuthSessionMiddleware(BaseHTTPMiddleware):
         - Session IDs should be stored hashed at rest by `SessionRepo`.
 
         """
-        # Default to anonymous user.
         request.state.user = None
-
-        # Extract session id from cookie.
         sid = request.cookies.get("z8_auth_sid")
-
-        # Get repos from app state (must be registered at startup).
         session_repo: SessionRepo = request.app.state.session_repo
         user_repo: UserRepo = request.app.state.user_repo
-
         if sid:
-            # Validate session and map to user_id.
             user_id = session_repo.get_user_id(sid)
             if user_id:
-                # Fetch user object and attach to request state.
                 request.state.user = user_repo.get_user_by_id(user_id)
-
-        # Continue processing request.
         return await call_next(request)

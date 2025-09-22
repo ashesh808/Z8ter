@@ -95,14 +95,17 @@ def run_server(
     # Start Uvicorn with an app factory. Your main.py must expose:
     #   def app_builder() -> AppBuilder: ...
     #   and app_builder.build() must be a callable returning ASGI app.
-    uvicorn.run(
-        "main:app_builder.build",
-        factory=True,
-        host=host,
-        port=port,
-        reload=reload,
-        app_dir=str(z8ter.BASE_DIR),
-        reload_dirs=[str(z8ter.BASE_DIR)],
-        log_level="info",
-        log_config=uvicorn_log_config(is_dev),
-    )
+    try:
+        uvicorn.run(
+            "main:app_builder.build",
+            factory=True,
+            host=host,
+            port=port,
+            reload=reload,
+            app_dir=str(z8ter.BASE_DIR),
+            reload_dirs=[str(z8ter.BASE_DIR)],
+            log_level="info",
+            log_config=uvicorn_log_config(is_dev),
+        )
+    except KeyboardInterrupt:
+        pass

@@ -31,18 +31,13 @@ from .middleware import AuthSessionMiddleware
 from .sessions import SessionManager
 
 __all__ = [
-    # Contracts
     "SessionRepo",
     "UserRepo",
-    # Crypto
     "hash_password",
     "verify_password",
     "needs_rehash",
-    # Sessions
     "SessionManager",
-    # Middleware
     "AuthSessionMiddleware",
-    # Guards
     "login_required",
     "skip_if_authenticated",
 ]

@@ -28,7 +28,6 @@ Design notes:
 
 from .app_builder import AppBuilder
 from .builder_functions import (
-    BuilderStep,
     publish_auth_repos_builder,
     use_app_sessions_builder,
     use_authentication_builder,
@@ -38,13 +37,11 @@ from .builder_functions import (
     use_templating_builder,
     use_vite_builder,
 )
+from .builder_step import BuilderStep
 
 __all__ = [
-    # Orchestrator
     "AppBuilder",
-    # Step spec
     "BuilderStep",
-    # Concrete builder functions
     "use_service_builder",
     "use_config_builder",
     "use_templating_builder",

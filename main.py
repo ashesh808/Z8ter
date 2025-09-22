@@ -14,4 +14,4 @@ app_builder.use_errors()
 app_builder.use_app_sessions()
 
 if __name__ == "__main__":
-    app = app_builder.build()
+    app = app_builder.build(debug=True)

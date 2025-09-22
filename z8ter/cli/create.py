@@ -1,4 +1,3 @@
-# z8ter/cli/create.py
 """Z8ter CLI scaffolding helpers.
 
 This module provides simple code generators for pages and APIs using Jinja

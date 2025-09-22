@@ -54,12 +54,9 @@ def login_required(handler):
         user = getattr(request.state, "user", None)
 
         if not user:
-            # Build the "next" URL for post-login redirect
             next_url = request.url.path
             if request.url.query:
                 next_url = f"{next_url}?{request.url.query}"
-
-            # 303 ensures safe redirect after non-GET requests
             return RedirectResponse(f"{login_path}?next={next_url}", status_code=303)
 
         return await handler(self, request, *args, **kwargs)
