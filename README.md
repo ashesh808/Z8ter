@@ -1,10 +1,10 @@
 # Z8ter
 
-🚀 **Z8ter** is a lightweight, Laravel-inspired full-stack Python web framework built on \[Starlette]. It’s designed for **rapid SaaS development** with a sharp, minimal surface area: server-side rendering by default, plus small client-side islands when you need them.
+**Z8ter** is a lightweight, Laravel-inspired full-stack Python web framework built on \[Starlette]. It’s designed for **rapid SaaS development** with a sharp, minimal surface area: server-side rendering by default, plus small client-side islands when you need them.
 
 ---
 
-## ✨ Features
+## Features
 
 - **File-based Views (SSR-first)**
 
@@ -54,7 +54,7 @@
 
 ---
 
-## 📦 Installation
+## Installation
 
 ```bash
 pip install z8ter
@@ -62,7 +62,7 @@ pip install z8ter
 
 ---
 
-## 🧩 Quickstart
+## Quickstart
 
 ```bash
 # 1. Create a new project
@@ -90,7 +90,7 @@ myapp/
 
 ---
 
-## 🔒 Authentication Example
+## Authentication Example
 
 ```python
 # views/dashboard.py
@@ -105,7 +105,7 @@ class Dashboard(View):
 
 ---
 
-## ⚙️ AppBuilder Example
+## AppBuilder Example
 
 ```python
 from z8ter.builders.app_builder import AppBuilder
@@ -125,7 +125,7 @@ app = builder.build(debug=True)
 
 ---
 
-## 📚 Modules Overview
+## Modules Overview
 
 - `z8ter.auth` → Contracts, crypto (Argon2), guards, session middleware/manager.
 - `z8ter.builders` → AppBuilder + builder functions for config, templating, vite, auth, errors.
@@ -141,7 +141,7 @@ app = builder.build(debug=True)
 
 ---
 
-## 🛣️ Roadmap
+## Roadmap
 
 - [ ] **SSO support** (Google, GitHub, LinkedIn).
 - [ ] **Guard system** (onboarding, RBAC, prefix-based).
@@ -153,7 +153,7 @@ app = builder.build(debug=True)
 
 ---
 
-## 🧠 Philosophy
+## Philosophy
 
 - **Conventions over configuration**: sensible defaults, minimal setup.
 - **SSR-first**: HTML-first rendering with small client-side islands.
@@ -162,6 +162,6 @@ app = builder.build(debug=True)
 
 ---
 
-## 📜 License
+## License
 
 MIT © [Ashesh Nepal](https://linkedin.com/in/ashesh808)
