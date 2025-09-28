@@ -1,8 +1,9 @@
 # Z8ter
 
-**Z8ter** is a lightweight, Laravel-inspired full-stack Python web framework built on Starlette. It’s designed for **rapid development** without compromising in UX.
+**Z8ter** is a lightweight full-stack async Python web framework built on Starlette designed for rapid development without compromising on UX.
 
 ---
+> ⚠️ **Status: Public Alpha** – Currently, Z8ter is **not recommended for production**. APIs may change without notice. 
 
 ## Quickstart
 
