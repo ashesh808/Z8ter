@@ -9,6 +9,9 @@
 ```bash
 z8 new myapp
 cd myapp
+python3 -m venv venv
+source venv/source/bin
+pip3 install -r requirements.txt
 z8 run dev
 ```
 
