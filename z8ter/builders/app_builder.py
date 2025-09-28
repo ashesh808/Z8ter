@@ -68,8 +68,6 @@ class AppBuilder:
         self.routes: list[Route] = []
         self.builder_queue: deque[BuilderStep] = deque()
 
-    # ---------- Route utilities
-
     def add_routes(self, path: str, func: Callable[..., Any]) -> None:
         """Add a single Starlette route.
 
@@ -99,8 +97,6 @@ class AppBuilder:
         routes += build_routes_from_pages()
         routes += build_routes_from_apis()
         return routes
-
-    # -- Enqueue feature steps (FIFO). kwargs merged into context at build.
 
     def use_service(self, obj: object, *, replace: bool = False) -> None:
         """Publish a service instance into the build context.
@@ -233,8 +229,6 @@ class AppBuilder:
             )
         )
 
-    # ---------- Build
-
     def build(self, debug: bool = True) -> Z8ter:
         """Construct the Starlette app and apply all queued builder steps.
 
@@ -252,14 +246,11 @@ class AppBuilder:
 
         @asynccontextmanager
         async def lifespan(app):
-            # startup work here (db pools, templates, etc.)
             try:
                 yield
             except (asyncio.CancelledError, KeyboardInterrupt):
-                # Expected on Ctrl-C; keep it quiet.
                 pass
             finally:
-                # shutdown work here
                 ...
 
         starlette_app = Starlette(
@@ -290,7 +281,6 @@ class AppBuilder:
                     "not idempotent."
                 )
 
-            # Enforce dependencies.
             missing = [r for r in step.requires if r not in applied]
             if missing:
                 need = ", ".join(missing)

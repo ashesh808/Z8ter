@@ -26,15 +26,13 @@ Security notes:
 from argon2 import PasswordHasher
 from argon2.low_level import Type
 
-# Global password hasher instance with fixed parameters.
-# Thread-safe per argon2 docs: safe to use across requests.
 _PH = PasswordHasher(
-    time_cost=3,  # Iterations (higher = slower/stronger)
-    memory_cost=65536,  # Memory (KiB). 64MB strikes balance security/perf.
-    parallelism=2,  # Threads to use internally
-    hash_len=32,  # Length of derived key (bytes)
-    salt_len=16,  # Random salt size (bytes)
-    type=Type.ID,  # Argon2id: hybrid of Argon2i + Argon2d
+    time_cost=3,
+    memory_cost=65536,
+    parallelism=2,
+    hash_len=32,
+    salt_len=16,
+    type=Type.ID,
 )
 
 
@@ -77,8 +75,6 @@ def verify_password(hash_: str, plain: str) -> bool:
         _PH.verify(hash_, plain)
         return True
     except Exception:
-        # Exception types can include VerifyMismatchError, InvalidHashError, etc.
-        # Collapse to False to avoid exposing details at call sites.
         return False
 
 

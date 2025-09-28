@@ -1,0 +1,2 @@
+recursive-include z8ter/scaffold *
+include z8ter/py.typed

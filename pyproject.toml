@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "z8ter"
-version = "0.2.4"
-description = "Minimal Starlette-powered app framework with pages, APIs, and a DX-first CLI."
+version = "0.2.5"
+description = "Lightweight full-stack async Python web framework built on Starlette designed for rapid development without compromising in UX"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
@@ -34,7 +34,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# If you want to slim core, you can move uvicorn/rich here and tell users to `pip install z8ter[server]`
 server = ["uvicorn[standard]>=0.30,<1.0", "rich>=13.7,<14"]
 dev = ["pytest", "pytest-asyncio", "ruff", "mypy", "build", "twine"]
 
@@ -59,18 +58,15 @@ extend-select = [
 ]
 ignore = []
 
+[tool.setuptools.package-data]
+z8ter = [
+  "py.typed",
+  "scaffold/**/*"
+]
+
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["z8ter*"]
-
-[tool.setuptools.package-data]
-z8ter = [
-  "py.typed",
-  "scaffold/**/*.j2",
-  "scaffold/**/*.jinja",
-  "scaffold/**/*.yaml",
-  "scaffold/**/*.yml",
-]

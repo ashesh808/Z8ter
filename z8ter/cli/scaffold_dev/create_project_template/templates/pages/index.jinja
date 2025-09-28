@@ -1,0 +1,66 @@
+{% extends "base.jinja" %}
+{% block content %}
+{% from "server-components/tailwind.jinja" import h1 %}
+{% from "server-components/islands.jinja" import Z8_Ping, Z8_Island_Pref %}
+
+<!-- Hero -->
+<section class="hero bg-base-200 rounded-2xl p-8 md:p-12">
+  <div class="hero-content flex-col md:flex-row gap-10">
+    <div class="shrink-0">
+      <div class="mask mask-hexagon bg-primary/10 p-6">
+        <span class="text-5xl">{{ page_content.hero.emoji }}</span>
+      </div>
+    </div>
+    <div>
+      {{ h1(page_content.hero.title) }}
+      <p class="py-4 text-lg opacity-90">
+        {{ page_content.hero.subtitle | safe }}
+      </p>
+      {% if page_content.hero.cta %}
+      <div class="flex flex-wrap items-center gap-3">
+        <a class="btn btn-primary" href="{{ page_content.hero.cta.href }}" target="_blank" rel="noopener">
+          {{ page_content.hero.cta.label }}
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Two cards: What is + Principles -->
+<section class="mt-10 grid md:grid-cols-2 gap-8">
+  <div class="card bg-base-200">
+    <div class="card-body">
+      <h2 class="card-title">{{ page_content.sections.what_is.title }}</h2>
+      <p class="opacity-80">{{ page_content.sections.what_is.text }}</p>
+    </div>
+  </div>
+
+  <div class="card bg-base-200">
+    <div class="card-body">
+      <h2 class="card-title">{{ page_content.sections.principles.title }}</h2>
+        <ul class="space-y-2 text-sm">
+          {% for it in page_content.sections.principles['items'] | default([]) %}
+            <li class="flex items-start gap-3">
+              <span>{{ it.icon }}</span><span>{{ it.text }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% if page_content.sections.principles.footer_island == "island_pref" %}
+        {{ Z8_Island_Pref() }}
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Client demos -->
+<section class="mt-10">
+  <div class="card bg-base-200">
+    <div class="card-body">
+      <h2 class="card-title">{{ page_content.sections.client_demos.title }}</h2>
+      <p class="opacity-80">{{ page_content.sections.client_demos.text }}</p>
+      {{ Z8_Ping(page_content.sections.client_demos.ping_endpoint) }}
+    </div>
+  </div>
+</section>
+{% endblock %}

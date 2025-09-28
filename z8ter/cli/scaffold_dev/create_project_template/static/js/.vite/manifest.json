@@ -1,0 +1,17 @@
+{
+  "src/ts/app.ts": {
+    "file": "assets/app-QBJ_Meim.js",
+    "name": "app",
+    "src": "src/ts/app.ts",
+    "isEntry": true,
+    "dynamicImports": [
+      "src/ts/pages/index.ts"
+    ]
+  },
+  "src/ts/pages/index.ts": {
+    "file": "assets/index-DsZ53cdY.js",
+    "name": "index",
+    "src": "src/ts/pages/index.ts",
+    "isDynamicEntry": true
+  }
+}

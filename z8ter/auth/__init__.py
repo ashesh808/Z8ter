@@ -4,7 +4,7 @@ This package exposes the minimal public API for Z8ter's authentication layer:
 session management, middleware that attaches the current user to requests, and
 route guards for common auth flows.
 
-Public modules (stable in 0.2):
+Public modules:
 - `contracts`: Protocols for pluggable repositories (`SessionRepo`, `UserRepo`).
 - `crypto`: Password hashing helpers (`hash_password`, `verify_password`,
   `needs_rehash`) using Argon2id.

@@ -34,7 +34,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_create = sub.add_parser("create_page", help="Create a new page scaffold")
     p_create.add_argument("name", help="Page name (e.g., 'home' or 'app/home')")
 
-    # create_api (missing previously)
+    # create_api
     p_api = sub.add_parser("create_api", help="Create a new API scaffold")
     p_api.add_argument("name", help="API name (e.g., 'hello' or 'billing')")
 
@@ -69,7 +69,6 @@ def main() -> None:
     elif args.cmd == "run":
         run_server(mode=args.mode)
     else:
-        # Should not happen due to required=True, but keep a friendly fallback.
         parser.print_help()
 
 

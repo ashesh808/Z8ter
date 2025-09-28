@@ -33,7 +33,6 @@ from starlette.templating import Jinja2Templates
 
 # -------- App directory registry (explicit > env > cwd) --------
 
-# Context-local explicit app directory. If unset, we fall back to env or cwd.
 _APP_DIR: contextvars.ContextVar[Path | None] = contextvars.ContextVar(
     "Z8TER_APP_DIR_EXPLICIT", default=None
 )

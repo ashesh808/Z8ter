@@ -1,0 +1,20 @@
+{% macro Header() -%}
+<header role="banner"
+  class="bg-base-200/80 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-base-300">
+  <div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+    <div class="text-xl font-bold text-primary">
+      <a href="/" class="hover:opacity-90 transition">Z8</a>
+    </div>
+  </div>
+</header>
+{%- endmacro %}
+
+{% macro Footer() -%}
+<footer
+  class="footer sm:footer-horizontal footer-center bg-base-200 text-base-content
+         fixed bottom-0 left-0 right-0 z-40 border-t border-base-300 h-16">
+  <aside>
+    <p>MIT © <a href="https://linkedin.com/in/ashesh808" target="_blank">Ashesh Nepal</a></p>
+  </aside>
+</footer>
+{%- endmacro %}

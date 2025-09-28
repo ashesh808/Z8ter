@@ -24,7 +24,6 @@ from jinja2 import (
 
 import z8ter
 
-# Prefer local developer overrides, then fall back to package templates.
 env = Environment(
     loader=ChoiceLoader(
         [
@@ -33,7 +32,7 @@ env = Environment(
         ]
     ),
     autoescape=select_autoescape(
-        enabled_extensions=(),  # disable for all extensions
+        enabled_extensions=(),
         default_for_string=False,
         default=False,
     ),
@@ -95,7 +94,7 @@ def create_api(api_name: str) -> None:
     """Scaffold a new API class under `api/`.
 
     Generates:
-        - api/{name}.py                          (API class skeleton)
+        - api/{name}.py
 
     Args:
         api_name: Logical API identifier (e.g., "hello", "billing").

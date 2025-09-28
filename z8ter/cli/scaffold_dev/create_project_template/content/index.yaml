@@ -1,0 +1,30 @@
+hero:
+  emoji: "⚡️"
+  title: "Z8ter"
+  subtitle: "Async Python, SSR-first. File-based views & tidy APIs, with a sprinkle of joy."
+  cta:
+    label: "GitHub"
+    href: "https://github.com/ashesh808/Z8ter"
+
+sections:
+  what_is:
+    title: "What is Z8ter?"
+    text: >
+      A minimal full-stack framework on Starlette + Jinja2. File-based views,
+      decorator APIs, and tiny per-page JS islands.
+
+  principles:
+    title: "Principles"
+    items:
+      - icon: "1."
+        text: "Conventions over config"
+      - icon: "2."
+        text: "Async-first, SSR-first"
+      - icon: "3."
+        text: "Small surface area, sharp tools"
+    footer_island: island_pref
+
+  client_demos:
+    title: "Client demos"
+    text: "Benchmark an API call locally and pretty-print the JSON."
+    ping_endpoint: "/api/hello"
