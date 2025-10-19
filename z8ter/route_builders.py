@@ -10,8 +10,8 @@ It supports scanning either:
 
 Conventions:
 - File-to-URL mapping:
-    root/resumes/index.py -> /resumes
-    root/resumes/edit.py  -> /resumes/edit
+    endpoints/resumes/index.py -> /resumes
+    endpoints/resumes/edit.py  -> /resumes/edit
 - A View subclass may override the inferred path via a class attribute `path`.
 - If multiple View classes live in the same file with the same inferred URL,
   a stable disambiguation path is used: `/{base}/{cls.__name__.lower()}`.

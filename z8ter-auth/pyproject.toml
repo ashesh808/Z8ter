@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "z8ter-auth"
+version = "0.1.0"
+dependencies = [
+  "starlette>=0.36",
+  "argon2-cffi>=23.1.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["z8ter*"]

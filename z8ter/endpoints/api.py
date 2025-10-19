@@ -95,7 +95,6 @@ class API:
               clean and let builders decide composition.
 
         """
-        # Historical quirk: trim a leading "endpoints" segment, if present.
         prefix: str = f"{cls._api_id}".removeprefix("endpoints")
         if not prefix.startswith("/"):
             prefix = f"/{prefix}"
@@ -127,7 +126,6 @@ class API:
         """
 
         def deco(fn: Callable[..., Any]) -> Callable[..., Any]:
-            # Attach endpoint metadata for __init_subclass__ to collect.
             fn._z8_endpoint = method.upper(), path  # type: ignore[attr-defined]
             return fn
 

@@ -11,7 +11,9 @@ Conventions:
 
 from __future__ import annotations
 
-import pathlib
+import json
+import logging
+from pathlib import Path
 from typing import Any
 
 import yaml
@@ -20,8 +22,9 @@ from starlette.templating import Jinja2Templates
 from z8ter import BASE_DIR, get_templates
 from z8ter.responses import Response
 
-# Default path for user-facing page content.
 contents_path = BASE_DIR / "content"
+
+logger = logging.getLogger("z8ter")
 
 
 def render(template_name: str, context: dict[str, Any] | None = None) -> Response:
@@ -44,26 +47,41 @@ def render(template_name: str, context: dict[str, Any] | None = None) -> Respons
     return templates.TemplateResponse(template_name, context)
 
 
-def load_content(page_id: str) -> dict[str, Any]:
-    """Load YAML page content for a given page id.
+def load_props(page_id: str, base: Path | None = None) -> dict[str, Any]:
+    """Load page props for a given page id from content files.
+
+    - Supports .json, .yaml, .yml (last match wins).
+    - `page_id` may use dots or slashes: "app.home" -> "app/home".
 
     Args:
-        page_id: Dot- or slash-based identifier (e.g., "about" or "app.home").
-            Dots are converted to slashes before resolving the content path.
+        page_id: Identifier like "about" or "app.home".
+        base: Optional override for the content root (defaults to `contents_path`).
 
     Returns:
-        dict[str, Any]: A dict containing {"page_content": <parsed_yaml>}.
+        {"page_content": <mapping>}
 
     Raises:
-        FileNotFoundError: If the expected YAML file does not exist.
-        yaml.YAMLError: If the YAML content is malformed.
-
-    Example:
-        >>> load_content("about")
-        {"page_content": {"title": "About Us", "body": "..."}}
+        json.JSONDecodeError / yaml.YAMLError: If content is malformed.
 
     """
-    content_yaml = page_id.replace(".", "/") + ".yaml"
-    content_path = contents_path / content_yaml
-    ctx = yaml.safe_load(pathlib.Path(content_path).read_text())
-    return {"page_content": ctx}
+    root = base if base is not None else contents_path
+    rel = page_id.replace(".", "/")
+
+    candidates = [
+        root / f"{rel}.json",
+        root / f"{rel}.yaml",
+        root / f"{rel}.yml",
+    ]
+
+    for path in candidates:
+        if path.is_file():
+            text = path.read_text(encoding="utf-8")
+            if path.suffix == ".json":
+                data = json.loads(text)
+            else:
+                data = yaml.safe_load(text)
+
+    if data is None:
+        data = {}
+        logger.warning(f"No content found for '{page_id}' under {root})")
+    return {"page_content": dict(data)}

@@ -18,8 +18,7 @@ from typing import Any, ClassVar
 from starlette.endpoints import HTTPEndpoint
 from starlette.types import Receive, Scope, Send
 
-# NOTE: The module is named "helpers.py", not "helper.py".
-from z8ter.endpoints.helpers import load_content, render
+from z8ter.endpoints.helpers import load_props, render
 from z8ter.requests import Request
 from z8ter.responses import Response
 
@@ -96,5 +95,5 @@ class View(HTTPEndpoint):
         ctx: dict[str, Any] = {"page_id": page_id, "request": request}
         if context:
             ctx.update(context)
-        ctx.update(load_content(page_id))
+        ctx.update(load_props(page_id))
         return render(template_name, ctx)
